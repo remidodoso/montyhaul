@@ -12,11 +12,34 @@ class Cr {
     this.dead = false;
     this.speed = 24;
     this.moved = 0;
+    this.sight_radius = 8;
 
     this.weapon = null;
     this.armor = null;
     this.magic = null;
     this.misc = null;
+  }
+  can_see(x, y) {
+    if (this.x == x && this.y == y) {
+      return true;
+    }
+    let los_to = los(this.x, this.y, x, y, this.sight_radius);
+    // deal with lighting when there is lighting
+    return los_to;
+  }
+  says(msg) {
+    if (U.can_see(this.x, this.y)) {
+      more(this.name + ' says "' + msg + '"');
+    } else {
+      more('You hear something say "' + msg + '"');
+    }
+  }
+  yells(msg) {
+    if (U.can_see(this.x, this.y)) {
+      more(this.name + ' yells "' + msg + '"');
+    } else {
+      more('You hear something yell "' + msg + '"');
+    }
   }
   pick_up() {
     if (!G.map.is_on(this.x, this.y)) {

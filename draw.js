@@ -1,4 +1,3 @@
-
 class DrawSets {
   constructor() {
     this.sets = new Array();

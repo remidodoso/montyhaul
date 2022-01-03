@@ -7,7 +7,7 @@ class You extends Cr {
     for (let x = this.x - 8; x < this.x + 8; x++) {
       for (let y = this.y - 8; y < this.y + 8; y++) {
         if (!G.map.is_on(x, y)) { continue; }
-        if (los(this.x, this.y, x, y, 8)) {
+        if (los(this.x, this.y, x, y, this.sight_radius)) {
           G.map.set_visible(x, y);
         }
       }

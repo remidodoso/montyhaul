@@ -96,8 +96,8 @@ class Mon extends Cr {
     if (Math.random() < .002) {
       if (!this.is_banzai()) {
         this.go_banzai(true);
+        this.yells('Banzai!');
       }
-      more(this.name + ' has gone banzai!');
     }
     this.moved -= this.speed;
     var x_delta = this.x - U.x;
