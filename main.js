@@ -1,6 +1,3 @@
-
-
-
 var monsters;
 
 var g_screen_backing_dirty_a;
@@ -65,8 +62,6 @@ function new_2d(x, y, init) {
   return a;
 }
 
-
-
 function create_screen_table() {
   g_screen_table = new_2d(G.DSPL_X, G.DSPL_Y, null);
   g_screen_table_el = document.createElement('table');
@@ -108,8 +103,6 @@ function set_screen_backing_dirty(x, y) {
     g_screen_backing_dirty_a.push([x, y]);
   }
 }
-
-
 
 function update_screen() {
   for (let i in g_screen_backing_dirty_a) {
@@ -237,20 +230,6 @@ function do_status_line() {
   //g_draw_sets.draw();
 }
 
-function dir_2_coord(dir_ch) {
-  switch (dir_ch) {
-    case 'h': return [-1, 0];
-    case 'j': return [0, 1];
-    case 'k': return [0, -1];
-    case 'l': return [1, 0];
-    case 'y': return [-1, -1];
-    case 'u': return [1, -1];
-    case 'b': return [-1, 1];
-    case 'n': return [1, 1];
-    default: return [null, null];
-  }
-}
-
 
 function handle_keypress(e) {
   _handle_keypress(e);
@@ -300,7 +279,7 @@ function _handle_keypress(e) {
   } else if (ch == 'z') {
     if (U.magic != null && U.magic instanceof Wand) {
       UI.get_eight_dir();
-      UI.pending_command = 'z';
+      UI.set_pending_command('z');
     } else {
       more("You aren't carrying a wand.");
     }
@@ -471,8 +450,8 @@ function init() {
 
   var food = new Food().place_at(5, 5);
   var potion = new Potion().place_at(10, 10);
-  var sword = new Sword().place_at(10, 5);
-  var wand = new Wand().place_at(7, 7);
+  var sword = new Sword().place_at(3, 3);
+  var wand = new Wand().place_at(3, 4);
 
   G.map.update();
   update_screen_backing();

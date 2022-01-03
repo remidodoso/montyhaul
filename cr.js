@@ -93,8 +93,8 @@ class Cr {
     if (this == U) {
       if (U.are_armed()) {
         more("You kill " + cr.name + ".");
-        x = cr.x;
-        y = cr.y;
+        let x = cr.x;
+        let y = cr.y;
         cr.move_to_raw(-1, -1);
         cr.dead = true;
         this.move_to_raw(x, y);

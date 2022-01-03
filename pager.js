@@ -28,8 +28,7 @@ class Pager {
     });
     max_width++;
     for (let y = 0; y < lines.length; y++) {
-      let line = lines[y];
-      line += ' ';
+      let line = lines[y] + ' ';
       let x;
       for (x = 0; x < line.length; x++) {
         if (x >= this.x_dim) { break; }

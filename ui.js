@@ -20,13 +20,16 @@ class UI {
   clear_char_handler() {
     this.char_handler = null;
   }
+  set_pending_command(command) {
+    this.pending_command = command;
+  }
   set_pending_action(action) {
     this.pending_action = action;
   }
   get_card_dir() {
     message('Direction? [hjkl]');
     g_draw_sets.draw();
-    UI.char_handler = function (ch) {
+    this.char_handler = function (ch) {
       switch (ch) {
         case 'h': case 'j': case 'k': case 'l':
           this.direction = ch;
@@ -39,7 +42,7 @@ class UI {
   get_eight_dir() {
     message('Direction? [hjklyubn]');
     g_draw_sets.draw();
-    UI.char_handler = function (ch) {
+    this.char_handler = function(ch) {
       switch (ch) {
         case 'h': case 'j': case 'k': case 'l':
         case 'y': case 'u': case 'b': case 'n':
@@ -56,7 +59,7 @@ class UI {
     this.pending_command = null;
     switch (cmd) {
       case 'z': {
-        let [dx, dy] = dir_2_coord(UI.direction);
+        let [dx, dy] = dir_2_coord(this.direction);
         zap(U.x, U.y, dx, dy);
         use_turn();
         return;
