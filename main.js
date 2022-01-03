@@ -1,3 +1,5 @@
+var U = null;
+
 var monsters;
 
 var g_screen_backing_dirty_a;

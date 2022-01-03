@@ -1,5 +1,7 @@
 /*
  * UI object ...
+ * 8 or so years later, I'm not really sure what it represents :)
+ * It'll probably make sense after I work on it a bit longer
  */
 class UI {
   constructor() {

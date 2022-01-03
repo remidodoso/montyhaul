@@ -31,6 +31,17 @@ class Level {
     this.obj = new_2d(this.x_dim, this.y_dim, null);
     this.create_terrain();
   }
+
+  /*
+  create_terrain_rooms() {
+    this.terrain = new_2d(this.x_dim, this.y_dim, K.TILE_WALL);
+    // divide it
+    let x_partition = 0.5 * this.x_dim + 0.4 * Math.random() - 0.2;
+    let 
+    // add rooms
+    // connect them
+  }
+*/
   create_terrain() {
     this.terrain = new_2d(this.x_dim, this.y_dim, K.TILE_FLOOR);
     for (let x = 0; x < this.x_dim; x++) {

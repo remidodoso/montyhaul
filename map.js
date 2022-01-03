@@ -97,7 +97,7 @@ class Map {
   set_all_map_known() {
     for (let x = 0; x < this.x_dim; x++) {
       for (let y = 0; y < this.y_dim; y++) {
-        this.set_visible(x, y);
+        this.set_known(x, y);
       }
     }
   }
