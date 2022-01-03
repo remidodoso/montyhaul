@@ -3,7 +3,7 @@
 <code>montyhaul</code> is a toy roguelike game implemented entirely in server-side JavaScript.
 
 It was originally written c. 2012(?) for Firefox. ECMAScript standardization broke some things (mostly 'for each'). 
-Also it was on Google and got archived. I finally took a little time to fix anachronisms and do some cleanup.
+Also it was on Google Code and got archived. I finally took a little time to fix anachronisms and do some cleanup.
 It seems to be running now.
 
 It's not really playable but it's kind of cool to watch ... I think. I might get it to a point of "playable" in 
