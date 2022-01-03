@@ -94,6 +94,13 @@ class Map {
     });
     this.overlay_vec = new Array;
   }
+  set_all_map_known() {
+    for (let x = 0; x < this.x_dim; x++) {
+      for (let y = 0; y < this.y_dim; y++) {
+        this.set_visible(x, y);
+      }
+    }
+  }
   set_known(x, y) {
     if (!this.known[x][y]) {
       this.known[x][y] = true;

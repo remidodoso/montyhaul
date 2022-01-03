@@ -275,7 +275,6 @@ function _handle_keypress(e) {
     }
     G.pager.show();
     return;
-    //    for each(let mon in monsters) { if(!mon.dead) { mcount++;
   } else if (ch == 'z') {
     if (U.magic != null && U.magic instanceof Wand) {
       UI.get_eight_dir();
@@ -303,6 +302,10 @@ function _handle_keypress(e) {
   } else if (ch == '?') {
     help();
     return;
+  } else if (ch == 'M') {
+    G.map.set_all_map_known();
+  } else if (ch == 'q') {
+    U.quaff();
   } else if (ch == 'd') {
     more("Sorry, dropping is not working at the moment.");
     //    if (U.invent.length > 0) {
@@ -385,7 +388,9 @@ function help() {
     'h, j, k, l, y, u, b, n: move (like in vi, + diagonal)                ');
   G.pager.writeln(
     'd: drop something                                                    ');
-  G.pager.writeln(
+    G.pager.writeln(
+    'q: quaff a magical drink                                             ');
+    G.pager.writeln(
     ',: pick up something                                                 ');
   G.pager.writeln(
     'i: see your inventory                                                ');
@@ -449,7 +454,7 @@ function init() {
   }
 
   var food = new Food().place_at(5, 5);
-  var potion = new Potion().place_at(10, 10);
+  var potion = new ImprovisedExplosivePotion().place_at(10, 10);
   var sword = new Sword().place_at(3, 3);
   var wand = new Wand().place_at(3, 4);
 

@@ -7,8 +7,6 @@ class Cr {
     this.ch = ch;
     this.name = name;
     this.attr = attr;
-    this.isa = new Array();
-    this.isa['Cr'] = true;
     this.dead = false;
     this.speed = 24;
     this.moved = 0;
@@ -17,8 +15,10 @@ class Cr {
     this.weapon = null;
     this.armor = null;
     this.magic = null;
+    this.potion = null;
     this.misc = null;
   }
+  
   can_see(x, y) {
     if (this.x == x && this.y == y) {
       return true;
@@ -27,6 +27,10 @@ class Cr {
     // deal with lighting when there is lighting
     return los_to;
   }
+
+  //
+  // Announcements
+  //
   says(msg) {
     if (U.can_see(this.x, this.y)) {
       more(this.name + ' says "' + msg + '"');
@@ -39,6 +43,30 @@ class Cr {
       more(this.name + ' yells "' + msg + '"');
     } else {
       more('You hear something yell "' + msg + '"');
+    }
+  }
+
+  //
+  // Announcements for actions
+  //
+  drinks(drinkable) {
+    if (this === U) {
+      more('You drink ' + drinkable.name + '.');
+    } else {
+      if (U.can_see(this.x, this.y)) {
+        more(this.name + ' drinks ' + drinkable.name + '.');
+      } else {
+        more('You hear drinking.');
+      }
+    }
+  }
+
+  //
+  // Things that creatures do
+  //
+  quaff() {
+    if (this.potion !== null) {
+      this.potion.quaffed_by(this);
     }
   }
   pick_up() {
@@ -75,6 +103,22 @@ class Cr {
         }
         if (this == U) { more('You picked up ' + o.name); }
       }
+    } else if (o instanceof Magic_Drink) {
+      if (this.potion !== null) {
+        if (this == U) {
+          more('You are already carrying a magical drink.');
+        }
+      } else {
+        if (G.map.is_on(o.x, o.y)) {
+          G.level.set_obj_at(o.x, o.y, null);
+          o.x = o.y = -1;
+          this.potion = o;
+        }
+        if (this == U) {
+          more('You picked up ' + o.name);
+        }
+      }
+
     } else if (o instanceof Misc) {
     } else {
       more("It's super heavy at this time.");
@@ -165,5 +209,5 @@ class Cr {
       return false;
     }
     return true;
-  }  
+  }
 }

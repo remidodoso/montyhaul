@@ -33,6 +33,9 @@ class You extends Cr {
     if (this.magic) {
       G.pager.writeln('  Magic Item: ' + this.magic.name);
     }
+    if (this.potion) {
+      G.pager.writeln('      Potion: ' + this.potion.name);
+    }
     G.pager.show();
   }
   died() {
