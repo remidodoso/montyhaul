@@ -93,6 +93,12 @@ class Mon extends Cr {
     if (this.moved < 0) {
       return;
     }
+    if (Math.random() < .002) {
+      if (!this.is_banzai()) {
+        this.go_banzai(true);
+      }
+      more(this.name + ' has gone banzai!');
+    }
     this.moved -= this.speed;
     var x_delta = this.x - U.x;
     var y_delta = this.y - U.y;
@@ -105,7 +111,11 @@ class Mon extends Cr {
     let r = Math.sqrt(x_delta * x_delta + y_delta * y_delta);
     x_delta = Math.floor(x_delta / norm + .5);
     y_delta = Math.floor(y_delta / norm + .5);
-    if (U.are_armed() && r < 6) {
+    let banzai = false;
+    if (this instanceof Gnome || this instanceof SuperGnome) {
+      banzai = this.is_banzai();
+    }
+    if (U.are_armed() && r < 6 && !banzai) {
       if (this.can_move_to(this.x + x_delta, this.y + y_delta) && Math.random > .2) {
         this.move_delta(x_delta, y_delta);
       } else {
@@ -119,30 +129,42 @@ class Mon extends Cr {
       }
     }
   }
-  
-  
-
 }
-
-
-//SuperGnome.prototype = new Mon('G', 'Ted the Gnome', 'red');
 
 class SuperGnome extends Mon {
   constructor() {
     super('G', 'Ted the Gnome', 'red');
-    this.isa['SuperGnome'] = true;
     this.speed = 18;
+    this.banzai = false;
+  }
+  is_banzai() {
+    return this.banzai;
+  }
+  go_banzai(yn) {
+    this.banzai = yn;
+    if (yn == true) {
+      this.attr = 'orange';
+    } else {
+      this.attr = 'red';
+    }
   }
 }
-
-//Gnome.prototype = new Mon('G', 'Bill the Gnome', '#ddd');
 
 class Gnome extends Mon {
   constructor() {
     super('G', 'Bill the Gnome', '#ddd');
-    this.isa['Gnome'] = true;
     this.speed = 36;
+    this.banzai = false;
+  }
+  is_banzai() {
+    return this.banzai;
+  }
+  go_banzai(yn) {
+    this.banzai = yn;
+    if (yn == true) {
+      this.attr = 'yellow';
+    } else {
+      this.attr = '#ddd';
+    }
   }
 }
-
-
