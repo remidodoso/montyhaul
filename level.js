@@ -33,16 +33,9 @@ class Level {
   }
 
   /*
-  create_terrain_rooms() {
-    this.terrain = new_2d(this.x_dim, this.y_dim, K.TILE_WALL);
-    // divide it
-    let x_partition = 0.5 * this.x_dim + 0.4 * Math.random() - 0.2;
-    let 
-    // add rooms
-    // connect them
-  }
-*/
-  create_terrain() {
+   * Create a blank new map with a walled border.
+   */
+  create_new_terrain() {
     this.terrain = new_2d(this.x_dim, this.y_dim, K.TILE_FLOOR);
     for (let x = 0; x < this.x_dim; x++) {
       this.terrain[x][0] = K.TILE_WALL;
@@ -52,9 +45,152 @@ class Level {
       this.terrain[0][y] = K.TILE_WALL;
       this.terrain[this.x_dim - 1][y] = K.TILE_WALL;
     }
+  }
+
+  /*
+   * Create a new map filled with wall.
+   */
+  create_filled_terrain() {
+    this.terrain = new_2d(this.x_dim, this.y_dim, K.TILE_WALL);
+  }
+
+  create_connected_rooms_terrain() {
+//    this.create_new_terrain();
+    this.create_filled_terrain();
+    this.create_connected_rooms();
+  }
+
+  make_a_room(x0, y0, x1, y1, connection) {
+    //
+    // it's assumed that x0, y0, x1, y1 are safely surrounded by walls
+    // width/height is the width/height of the partition
+    // dimensions here are *interior*, not including room walls
+    // connection is 'left', 'right', 'top', 'bottom'
+    // an extra cell is allocated there for a corridor
+    //
+    let width = x1 - x0;
+    let height = y1 - y0;
+    switch (connection) {
+      case 'left':
+      case 'right':
+        width  -= 1;
+        break;
+      case 'top':
+      case 'bottom':
+        height -= 1;
+        break;
+    }
+    // the room is a minimum size of 2x2 to maximum of width x height
+    let room_width = Math.floor(2 + (width - 2) * Math.random());
+    let room_height = Math.floor(2 + (height - 2) * Math.random());
+    // divvy up the leftover
+    let border_left = Math.floor((width - room_width) * Math.random());
+    let border_right = width - room_width - border_left;
+    let border_top = Math.floor((height - room_height) * Math.random());
+    let border_bottom = height - room_height - border_top;
+    // scoot for the 1 cell border and as appropriate for location of connection
+    border_left += 1;
+    border_top += 1;
+    switch(connection) {
+      case 'left':
+        border_left += 1;
+        break;
+      case 'right':
+        border_right -= 1;
+        break;
+      case 'top':
+        border_top += 1;
+        break;
+      case 'bottom':
+        border_bottom -= 1;
+        break;
+    }
+    // return the result
+    return {
+      x0: x0 + border_left,
+      y0: y0 + border_top,
+      x1: x1 - border_right,
+      y1: y1 - border_bottom,
+    };
+  }
+
+  //                        x_partition
+  //    ######################################################
+  //    #                    |                               #
+  //    #                    |                               #
+  //    #    ##########      |                               #
+  //    #    #        #      |                               #
+  //    #    #        #      |                               #
+  //    #    #        ##########    ###################      #
+  //    #    #        #      | #    #                 #      #
+  //    #    ##########      | #    #                 #      #
+  //    #                    | ######                 #      #
+  //    #                    |      ###################      #
+  //    #                    |                               #
+  //    #                    |                               #
+  //    ######################################################
+  //
+  //
+  connect_vertical_walls(x0, y00, y01, x1, y10, y11, mode) {
+    // for now mode is "zigzag" regardless
+    mode = 'zigzag';
+    // connect them
+    let y_connect_left = Math.floor((y01 - y00) * Math.random()) + y00;
+    let y_connect_right = Math.floor((y11 - y10) * Math.random()) + y10;
+    let x_corridor_middle = Math.floor((x1 - x0 - 1) * Math.random()) + x0;
+    for (let x = x0 + 1; x < x_corridor_middle; x++) {
+      this.terrain[x][y_connect_left] = K.TILE_FLOOR;
+    }
+    for (let x = x_corridor_middle; x < x1; x++) {
+      this.terrain[x][y_connect_right] = K.TILE_FLOOR;
+    }
+    if (y_connect_left < y_connect_right) {
+      for (let y = y_connect_left; y <= y_connect_right; y++) {
+        this.terrain[x_corridor_middle][y] = K.TILE_FLOOR;
+      }
+    } else {
+      for (let y = y_connect_right; y <= y_connect_left; y++) {
+        this.terrain[x_corridor_middle][y] = K.TILE_FLOOR;
+      }  
+    }
+  }
+  create_connected_rooms() {
+    // divide it
+    let x_partition = Math.floor((0.5 + Math.random() * 0.3 - 0.15) * this.x_dim);
+    // add rooms
+    // The address of the upper left corner is 0,0.
+    // The address of the lower right corner is x_dim - 1, y_dim - 1
+    // pass in an area within the rectangle defined by the partition
+    let room_1 = this.make_a_room(1, 1, x_partition - 1, this.y_dim - 1, 'right');
+    let room_2 = this.make_a_room(x_partition + 1, 0, this.x_dim - 1, this.y_dim - 1, 'left');
+    // place them
+    for (let x = room_1.x0; x <= room_1.x1; x++) {
+      for (let y = room_1.y0; y < room_1.y1; y++) {
+        this.terrain[x][y] = K.TILE_FLOOR;
+      }
+    }
+    for (let x = room_2.x0; x <= room_2.x1; x++) {
+      for (let y = room_2.y0; y < room_2.y1; y++) {
+        this.terrain[x][y] = K.TILE_FLOOR;
+      }
+    }
+    this.connect_vertical_walls(
+      room_1.x1, room_1.y0, room_1.y1, 
+      room_2.x0, room_2.y0, room_2.y1, 'zigzag'
+    );
+    // The connection is zig zag shaped
+    // Starts off the edge of the left room
+    // Ends off the edge off the right room
+  }
+
+  create_terrain() {
+    this.create_connected_rooms_terrain();
+//    this.create_new_terrain();
+
     //
     // Add some random "pillars"
     //
+    /*
     let pillars = Math.floor(Math.random() * 4) + 2;
     for (var n = 0; n < pillars; n++) {
       let x_size = Math.floor(Math.random() * 3) + 2;
@@ -67,6 +203,7 @@ class Level {
         }
       }
     }
+    */
     return;
   }
   is_opaque(x, y) {

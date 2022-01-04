@@ -43,6 +43,7 @@ function tile_solid(tile) {
     case K.TILE_FLOOR: return false;
     case K.TILE_WALL: return true;
   };
+  return false;
 }
 
 function new_1d(x, init) {
@@ -425,40 +426,26 @@ function init() {
   g_cr_at = new_2d(G.MAP_X, G.MAP_Y, null);
   g_obj_at = new_2d(G.MAP_X, G.MAP_Y, null);
   U = new You();
-  U.move_to(2, 2);
+  U.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
 
   monsters = new Array();
 
   for (var i = 0; i < 20; i++) {
     var gnome = new Gnome();
-    for (; ;) {
-      var x = Math.floor(Math.random() * (G.MAP_X - 15)) + 10;
-      var y = Math.floor(Math.random() * (G.MAP_Y - 10)) + 7;
-      if (G.level.cr_at(x, y) == null) {
-        break;
-      }
-    }
-    gnome.move_to(x, y);
+    gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
     monsters.push(gnome);
   }
 
   for (var i = 0; i < 10; i++) {
     var gnome = new SuperGnome();
-    for (; ;) {
-      var x = Math.floor(Math.random() * (G.MAP_X - 15)) + 10;
-      var y = Math.floor(Math.random() * (G.MAP_Y - 10)) + 7;
-      if (G.level.cr_at(x, y) == null) {
-        break;
-      }
-    }
-    gnome.move_to(x, y);
+    gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
     monsters.push(gnome);
   }
 
   var food = new Food().place_at(5, 5);
-  var potion = new ImprovisedExplosivePotion().place_at(10, 10);
-  var sword = new Sword().place_at(3, 3);
-  var wand = new Wand().place_at(3, 4);
+  U.potion = new ImprovisedExplosivePotion();
+  U.weapon = new Sword();
+  U.magic = new Wand();
 
   G.map.update();
   update_screen_backing();

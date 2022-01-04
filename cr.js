@@ -18,7 +18,7 @@ class Cr {
     this.potion = null;
     this.misc = null;
   }
-  
+
   can_see(x, y) {
     if (this.x == x && this.y == y) {
       return true;
@@ -178,6 +178,27 @@ class Cr {
         }
       }
     }
+  }
+  //
+  // Move a Cr to a random non-solid, unoccupied place within a rectangle
+  // needs to be generalized blah blah
+  // I could see how this could be used with an array of things to move ....
+  //
+  move_to_random_within(x0, y0, x1, y1) {
+    let a = new Array();
+    for (let x = x0; x <= x1; x++) {
+      for (let y = y0; y <= y1; y++) {
+        if (!G.level.terrain_at(x, y).is_solid() && G.level.cr_at(x, y) === null) {
+          a.push([x, y]);
+        }
+      }
+    }
+    a = shuffle(a);
+    if (a.length > 0) {
+      this.move_to(a[0][0], a[0][1]);
+      return true;
+    }
+    return false;
   }
   move_to(x, y) {
     if (!G.map.is_on(x, y)) {

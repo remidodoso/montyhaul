@@ -21,5 +21,8 @@ class K {
   constructor() {
     this.TILE_FLOOR = new Tile('.');
     this.TILE_WALL = new Tile('#');
+    this.TILE_DEBUG_A = new Tile('€');
+    this.TILE_DEBUG_B = new Tile('₴');
+    this.TILE_DEBUG_C = new Tile('₹');
   }
 }
