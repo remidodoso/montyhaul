@@ -430,7 +430,7 @@ function init() {
 
   monsters = new Array();
 
-  for (var i = 0; i < 20; i++) {
+  for (var i = 0; i < 15; i++) {
     var gnome = new Gnome();
     gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
     monsters.push(gnome);
@@ -438,6 +438,12 @@ function init() {
 
   for (var i = 0; i < 10; i++) {
     var gnome = new SuperGnome();
+    gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
+    monsters.push(gnome);
+  }
+
+  for (var i = 0; i < 5; i++) {
+    var gnome = new TurboGnome();
     gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
     monsters.push(gnome);
   }

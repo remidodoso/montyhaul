@@ -112,21 +112,44 @@ class Mon extends Cr {
     x_delta = Math.floor(x_delta / norm + .5);
     y_delta = Math.floor(y_delta / norm + .5);
     let banzai = false;
-    if (this instanceof Gnome || this instanceof SuperGnome) {
+    if (this instanceof Gnome || this instanceof SuperGnome || this instanceof TurboGnome) {
       banzai = this.is_banzai();
     }
-    if (U.are_armed() && r < 6 && !banzai) {
-      if (this.can_move_to(this.x + x_delta, this.y + y_delta) && Math.random > .2) {
-        this.move_delta(x_delta, y_delta);
+    if (this.can_see(U.x, U.y)) {
+      if (U.are_armed() && r < 6 && !banzai) {
+        if (this.can_move_to(this.x + x_delta, this.y + y_delta) && Math.random > .2) {
+          this.move_delta(x_delta, y_delta);
+        } else {
+          this.move_away_from(U.x, U.y);
+        }
       } else {
-        this.move_away_from(U.x, U.y);
+        if (this.can_move_to(this.x - x_delta, this.y - y_delta)) {
+          this.move_delta(-x_delta, -y_delta);
+        } else {
+          this.move_toward(U.x, U.y);
+        }
       }
     } else {
-      if (this.can_move_to(this.x - x_delta, this.y - y_delta)) {
-        this.move_delta(-x_delta, -y_delta);
-      } else {
-        this.move_toward(U.x, U.y);
-      }
+      // stay put? for now anyway
+    }
+  }
+}
+
+class TurboGnome extends Mon {
+  constructor() {
+    super('G', 'Arnold the Gnome', 'blue');
+    this.speed = 14;
+    this.banzai = false;
+  }
+  is_banzai() {
+    return this.banzai;
+  }
+  go_banzai(yn) {
+    this.banzai = yn;
+    if (yn == true) {
+      this.attr = 'magenta';
+    } else {
+      this.attr = 'blue';
     }
   }
 }
