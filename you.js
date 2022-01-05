@@ -1,6 +1,34 @@
 class You extends Cr {
   constructor() {
     super('@', 'You', 'cyan');
+    this.tickled = 0;
+  }
+  use_turn() {
+    G.u_turn++;
+  }
+  get_tickled(by_cr) {
+    more(by_cr.name + ' tickles you.');
+    this.tickled++;
+    if (this.tickled >= 10) {
+      more('You were tickled to death.');
+      this.died();
+      return;
+    }
+  }
+  how_tickled() {
+    switch (this.tickled) {
+      case 0: return 'nope';
+      case 1: return 'not really';
+      case 2: return 'a little';
+      case 3: return 'somewhat';
+      case 4: return 'uncomfortably';
+      case 5: return 'ugh';
+      case 6: return 'this sucks';
+      case 7: return 'going crazy';
+      case 8: return 'dying';
+      case 9: return 'literally dying';
+      default: return 'to death'
+    }
   }
   compute_los() {
     if (!G.map.is_on(this.x, this.y)) { return; }
@@ -39,9 +67,10 @@ class You extends Cr {
     G.pager.show();
   }
   died() {
-    G.pager.writeln("You were unarmed and died while attempting a melee attack.");
-    G.pager.writeln("Unarmed combat training is not available; unarmed death works though.");
-    G.pager.writeln("You may want to pick up -- ',' key -- the sword -- ')' symbol -- next time.");
+//    G.pager.writeln("You were unarmed and died while attempting a melee attack.");
+//    G.pager.writeln("Unarmed combat training is not available; unarmed death works though.");
+//    G.pager.writeln("You may want to pick up -- ',' key -- the sword -- ')' symbol -- next time.");
+    G.pager.writeln("You died.");
     G.pager.writeln("So long and thanks for playing.");
     G.pager.show();
     G.dead = true;

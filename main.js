@@ -213,11 +213,6 @@ function mon_move() {
   }
 }
 
-function use_turn() {
-  G.u_turn++;
-  mon_move();
-}
-
 function do_status_line() {
   let o = G.level.obj_at(U.x, U.y);
   if (o != null) {
@@ -228,6 +223,7 @@ function do_status_line() {
     msg += U.x + ', ';
     if (U.y < 10) { msg += ' '; }
     msg += U.y + ']';
+    msg += ' Tickled: ' + U.how_tickled();
     message(msg);
   }
   //g_draw_sets.draw();
@@ -332,7 +328,8 @@ function _handle_keypress(e) {
   if (G.dead) {
     return;
   }
-  use_turn();
+  U.use_turn();
+  mon_move();
   do_status_line();
 
   e.cancelBubble = true;

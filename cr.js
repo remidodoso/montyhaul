@@ -19,6 +19,18 @@ class Cr {
     this.misc = null;
   }
 
+  //
+  // returns delta if adjacent
+  //
+  adjacent_to_cr(cr) {
+    let x_delta, y_delta;
+    if (Math.abs(x_delta = this.x - cr.x) <= 1 &&
+        Math.abs(y_delta = this.y - cr.y) <= 1) {
+      return { x_delta: x_delta, y_delta: y_delta };
+    } else {
+      return null;
+    }
+  }
   can_see(x, y) {
     if (this.x == x && this.y == y) {
       return true;
@@ -218,7 +230,7 @@ class Cr {
   move_delta(x_delta, y_delta) {
     this.move_to(this.x + x_delta, this.y + y_delta);
   }
-  can_move_to(x, y) {
+  can_move_to(x, y, can_move_onto_cr) {
     if (!G.map.is_on(x, y)) {
       return false;
     }
@@ -226,7 +238,7 @@ class Cr {
     if (tile.is_solid()) {
       return false;
     }
-    if (G.level.cr_at(x, y) != null) {
+    if (!can_move_onto_cr && G.level.cr_at(x, y) != null) {
       return false;
     }
     return true;

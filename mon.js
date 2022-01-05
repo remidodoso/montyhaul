@@ -126,11 +126,14 @@ class Mon extends Cr {
         if (this.can_move_to(this.x - x_delta, this.y - y_delta)) {
           this.move_delta(-x_delta, -y_delta);
         } else {
+          if (this.adjacent_to_cr(U)) {
+            U.get_tickled(this);
+          }
           this.move_toward(U.x, U.y);
         }
       }
     } else {
-      // stay put? for now anyway
+      // stay put? for now
     }
   }
 }
