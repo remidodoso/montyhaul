@@ -4,6 +4,15 @@ class You extends Cr {
     this.tickled = 0;
   }
   use_turn() {
+    if (this.tickled > 0 && Math.random() > 0.95) {
+      this.tickled -= Math.ceil(Math.random() * 3);
+      if (this.tickled < 0) { this.tickled = 0 };
+      if (this.tickled == 0) {
+        more('You catch your breath. Whew!');
+      } else {
+        more('You catch your breath somewhat. That feels a little better.');
+      }
+    }
     G.u_turn++;
   }
   get_tickled(by_cr) {
