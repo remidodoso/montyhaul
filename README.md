@@ -7,7 +7,7 @@ Also it was on Google Code and got archived. I finally took a little time to dig
 It seems to be running now.
 
 It's not really playable but it's kind of cool to watch ... I think. I might get it to a point of "playable" in 
-2022, or in 2032, or never. I'm 50-50 on the first and last options. But you can see how some of the systems
+2022, uh make that 2023, or in 2032, or never. I'm 50-50 on the first and last options. But you can see how some of the systems
 work ...
 
 * Move around with rogue/nethack/vi-style key bindings
