@@ -2,7 +2,7 @@
 
 # Note:
 
-_If I sent you a zip, it's almost surely out of date._ What you ought to do is grab your own copy
+__If I sent you a zip, it's almost surely out of date.__ What you ought to do is grab your own copy
 of main. It *should* be working.
 
 No I don't have a release branch yet.
