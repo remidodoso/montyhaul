@@ -130,6 +130,11 @@ class Level {
   //    #                    |                               #
   //    ######################################################
   //
+  // 川 ≈
+  // ⎔ 𝑓
+  // 𝑓 
+  // φ a b 
+  // φ a b 𝑓 bar
   //
   connect_vertical_walls(x0, y00, y01, x1, y10, y11, mode) {
     // for now mode is "zigzag" regardless
@@ -154,43 +159,88 @@ class Level {
       }  
     }
   }
-  create_connected_rooms() {
-    // divide it
-    let x_partition = Math.floor((0.5 + Math.random() * 0.3 - 0.15) * this.x_dim);
-    // add rooms
-    // The address of the upper left corner is 0,0.
-    // The address of the lower right corner is x_dim - 1, y_dim - 1
-    // pass in an area within the rectangle defined by the partition
-    let room_1 = this.make_a_room(1, 1, x_partition - 1, this.y_dim - 1, 'right');
-    let room_2 = this.make_a_room(x_partition + 1, 0, this.x_dim - 1, this.y_dim - 1, 'left');
-    // place them
-    for (let x = room_1.x0; x <= room_1.x1; x++) {
-      for (let y = room_1.y0; y < room_1.y1; y++) {
-        this.terrain[x][y] = K.TILE_FLOOR;
-      }
+  connect_horizontal_walls(y0, x00, x01, y1, x10, x11, mode) {
+    // for now mode is "zigzag" regardless
+    mode = 'zigzag';
+    // connect them
+    let x_connect_top = Math.floor((x01 - x00) * Math.random()) + x00;
+    let x_connect_bottom = Math.floor((x11 - x10) * Math.random()) + x10;
+    let y_corridor_middle = Math.floor((y1 - y0 - 1) * Math.random()) + y0;
+    for (let y = y0 + 1; y < y_corridor_middle; y++) {
+      this.terrain[x_connect_top][y] = K.TILE_FLOOR;
     }
-    for (let x = room_2.x0; x <= room_2.x1; x++) {
-      for (let y = room_2.y0; y < room_2.y1; y++) {
-        this.terrain[x][y] = K.TILE_FLOOR;
-      }
+    for (let y = y_corridor_middle; y < y1; y++) {
+      this.terrain[x_connect_bottom][y] = K.TILE_FLOOR;
     }
-    this.connect_vertical_walls(
-      room_1.x1, room_1.y0, room_1.y1, 
-      room_2.x0, room_2.y0, room_2.y1, 'zigzag'
-    );
-    // The connection is zig zag shaped
-    // Starts off the edge of the left room
-    // Ends off the edge off the right room
+    if (x_connect_top < x_connect_bottom) {
+      for (let x = x_connect_top; x <= x_connect_bottom; x++) {
+        this.terrain[x][y_corridor_middle] = K.TILE_FLOOR;
+      }
+    } else {
+      for (let x = x_connect_bottom; x <= x_connect_top; x++) {
+        this.terrain[x][y_corridor_middle] = K.TILE_FLOOR;
+      }  
+    }
+  }
+  create_connected_rooms(orientation, rooms) {
+    if (orientation == 'horizontal') {
+      let x_partition = Math.floor((0.5 + Math.random() * 0.3 - 0.15) * this.x_dim);
+      // add rooms
+      // The address of the upper left corner is 0,0.
+      // The address of the lower right corner is x_dim - 1, y_dim - 1
+      // pass in an area within the rectangle defined by the partition
+      let room_1 = this.make_a_room(1, 1, x_partition - 1, this.y_dim - 1, 'right');
+      let room_2 = this.make_a_room(x_partition + 1, 0, this.x_dim - 1, this.y_dim - 1, 'left');
+      // place them
+      for (let x = room_1.x0; x <= room_1.x1; x++) {
+        for (let y = room_1.y0; y < room_1.y1; y++) {
+          this.terrain[x][y] = K.TILE_FLOOR;
+        }
+      }
+      for (let x = room_2.x0; x <= room_2.x1; x++) {
+        for (let y = room_2.y0; y < room_2.y1; y++) {
+          this.terrain[x][y] = K.TILE_FLOOR;
+        }
+      }
+      this.connect_vertical_walls(
+        room_1.x1, room_1.y0, room_1.y1, 
+        room_2.x0, room_2.y0, room_2.y1, 'zigzag'
+      );
+    } else {
+      let y_partition = Math.floor((0.5 + Math.random() * 0.3 - 0.15) * this.y_dim);
+
+      let room_1 = this.make_a_room(1, 1, this.x_dim - 1, 'bottom', y_partition - 1);
+      let room_2 = this.make_a_room(this.x_dim - 1, y_partition + 1, this.x_dim - 1, 0, 'top');
+      for (let x = room_1.x0; x <= room_1.x1; x++) {
+        for (let y = room_1.y0; y < room_1.y1; y++) {
+          this.terrain[x][y] = K.TILE_FLOOR;
+        }
+      }
+      for (let x = room_2.x0; x <= room_2.x1; x++) {
+        for (let y = room_2.y0; y < room_2.y1; y++) {
+          this.terrain[x][y] = K.TILE_FLOOR;
+        }
+      }
+      this.connect_vertical_walls(
+        room_1.x1, room_1.y0, room_1.y1, 
+        room_2.x0, room_2.y0, room_2.y1, 'zigzag'
+      );
+    }
   }
 
   create_terrain() {
-    this.create_connected_rooms_terrain();
-//    this.create_new_terrain();
+    //
+    // The "rooms" code is broken so it's go back to the "big room with pillars"
+    // and have this be at least playable
+    //
+
+    //    this.create_connected_rooms_terrain();
+
+    this.create_new_terrain();
 
     //
     // Add some random "pillars"
     //
-    /*
     let pillars = Math.floor(Math.random() * 4) + 2;
     for (var n = 0; n < pillars; n++) {
       let x_size = Math.floor(Math.random() * 3) + 2;
@@ -203,7 +253,6 @@ class Level {
         }
       }
     }
-    */
     return;
   }
   is_opaque(x, y) {

@@ -25,19 +25,13 @@ class You extends Cr {
     }
   }
   how_tickled() {
-    switch (this.tickled) {
-      case 0: return 'nope';
-      case 1: return 'not really';
-      case 2: return 'a little';
-      case 3: return 'somewhat';
-      case 4: return 'uncomfortably';
-      case 5: return 'ugh';
-      case 6: return 'this sucks';
-      case 7: return 'going crazy';
-      case 8: return 'dying';
-      case 9: return 'literally dying';
-      default: return 'to death'
+    if (this.tickled < 0 || this.tickled > 9) {
+      return 'to death';
     }
+    return [
+      'nope',    'not really',    'a little',    'somewhat',   'uncomfortably',
+      'ugh',     'this sucks',    'going crazy', 'dying',      'literally dying',
+    ][this.tickled];
   }
   compute_los() {
     if (!G.map.is_on(this.x, this.y)) { return; }

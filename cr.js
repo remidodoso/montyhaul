@@ -12,6 +12,9 @@ class Cr {
     this.moved = 0;
     this.sight_radius = 8;
 
+    this.age = 0;
+    this.turns = 0;
+
     this.weapon = null;
     this.armor = null;
     this.magic = null;

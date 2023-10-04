@@ -1,6 +1,7 @@
 class Mon extends Cr {
   constructor(ch, name, attr) {
     super(ch, name, attr);
+//    this.plan = 
   }
   pick_up(obj) {
     // assuming its okay to pick up obj ...
@@ -116,7 +117,7 @@ class Mon extends Cr {
       banzai = this.is_banzai();
     }
     if (this.can_see(U.x, U.y)) {
-      if (U.are_armed() && r < 6 && !banzai) {
+      if (U.are_armed() && r < 4 && !banzai) {
         if (this.can_move_to(this.x + x_delta, this.y + y_delta) && Math.random > .2) {
           this.move_delta(x_delta, y_delta);
         } else {

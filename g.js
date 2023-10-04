@@ -41,6 +41,9 @@ class G {
     this.pager_waiting_for_space = false;
 
     this.u_turn = 0;
+
+    this.monsters = new Array();
+
   }
 };
 

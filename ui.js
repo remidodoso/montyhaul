@@ -2,6 +2,8 @@
  * UI object ...
  * 8 or so years later, I'm not really sure what it represents :)
  * It'll probably make sense after I work on it a bit longer
+ * 
+ * I think probably a lot of the stuff in main.js should go in here
  */
 class UI {
   constructor() {
@@ -63,12 +65,33 @@ class UI {
       case 'z': {
         let [dx, dy] = dir_2_coord(this.direction);
         zap(U.x, U.y, dx, dy);
-        use_turn();
+        this.mon_move();
+        U.use_turn();
+        return;
+      }
+    }
+  }
+
+  mon_move() {
+    G.monsters.forEach((m) => {
+      if (!m.dead) {
+        m.moved += 24;
+      }
+    });
+    //  for each (let m in monsters) 
+    for (; ;) {
+      let move_left = false;
+      G.monsters.forEach((m) => {
+        //    for each(let m in monsters) {
+        if (!m.dead) {
+          m.do_move();
+          if (m.moved >= 0) { move_left = true; }
+        }
+      });
+      if (!move_left) {
         return;
       }
     }
   }
   
-  
 }
-

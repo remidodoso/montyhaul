@@ -1,7 +1,5 @@
 var U = null;
 
-var monsters;
-
 var g_screen_backing_dirty_a;
 
 var g_map_needs_update = false;
@@ -167,13 +165,23 @@ function zap(x, y, xinc, yinc) {
     if (cr != null) {
       cr.vaporize();
     }
-    if (i % 4 == 0) { g_draw_sets.new_set() };
+    //
+    // Right now, in Firefox, the zap animation (a line of asterisks)
+    // is sometimes not being displayed. The mod divisor below
+    // controls how many asterisks are displayed at a time. This was
+    // set to 4, but often the animation wasn't visible. So I set it to
+    // 2 here. Still this seems not to work intermittently.
+    //
+    if (i % 2 == 0) { g_draw_sets.new_set() };
     update_map_to_screen_backing();
     update_screen();
     x += xinc;
     y += yinc;
   }
-  g_draw_sets.new_set(20);
+  /*
+   * parameter is delay in ms
+   */
+  g_draw_sets.new_set(50);
   save_cell.forEach((c) => {
     //  for each (let c in save_cell) {
     G.map.set_known(c[0], c[1]);
@@ -191,27 +199,6 @@ function print_help() {
   more("hjklyubn=move ,=pickup d=drop i=inventory ?=help");
 }
 
-function mon_move() {
-  monsters.forEach((m) => {
-    if (!m.dead) {
-      m.moved += 24;
-    }
-  });
-  //  for each (let m in monsters) 
-  for (; ;) {
-    let move_left = false;
-    monsters.forEach((m) => {
-      //    for each(let m in monsters) {
-      if (!m.dead) {
-        m.do_move();
-        if (m.moved >= 0) { move_left = true; }
-      }
-    });
-    if (!move_left) {
-      return;
-    }
-  }
-}
 
 function do_status_line() {
   let o = G.level.obj_at(U.x, U.y);
@@ -261,7 +248,7 @@ function _handle_keypress(e) {
 
   if (ch == 'S') {
     let mcount = 0;
-    monsters.forEach((mon) => {
+    G.monsters.forEach((mon) => {
       if (!mon.dead) {
         mcount++;
       }
@@ -324,12 +311,16 @@ function _handle_keypress(e) {
   } else if (ch == 'i') {
     U.dspl_invent();
     return;
+  } else if (ch == '.') {
+    // wait a turn
+  } else {
+    return;
   }
   if (G.dead) {
     return;
   }
+  UI.mon_move();
   U.use_turn();
-  mon_move();
   do_status_line();
 
   e.cancelBubble = true;
@@ -397,6 +388,8 @@ function help() {
   G.pager.writeln(
     'z: zap your wand                                                     ');
   G.pager.writeln(
+    '.: wait a turn                                                       ');
+  G.pager.writeln(
     'S: status                                                            ');
   G.pager.writeln(
     '?: help (this)                                                       ');
@@ -425,24 +418,24 @@ function init() {
   U = new You();
   U.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
 
-  monsters = new Array();
+
 
   for (var i = 0; i < 15; i++) {
     var gnome = new Gnome();
     gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-    monsters.push(gnome);
+    G.monsters.push(gnome);
   }
 
   for (var i = 0; i < 10; i++) {
     var gnome = new SuperGnome();
     gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-    monsters.push(gnome);
+    G.monsters.push(gnome);
   }
 
   for (var i = 0; i < 5; i++) {
     var gnome = new TurboGnome();
     gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-    monsters.push(gnome);
+    G.monsters.push(gnome);
   }
 
   var food = new Food().place_at(5, 5);
