@@ -1,11 +1,13 @@
 # montyhaul
 
-Note:
+# Note:
 
 If I sent you a zip, it's almost surely out of date. What you ought to do is grab your own copy
 of main. It *should* be working.
 
 No I don't have a release branch yet.
+
+# Summary:
 
 <code>montyhaul</code> is a toy roguelike game implemented entirely in server-side JavaScript.
 
