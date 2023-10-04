@@ -290,8 +290,7 @@ class Level {
   sym_at(x, y) {
     if (this.cr[x][y] != null) {
       return this.cr[x][y].ch;
-    }
-    if (this.obj[x][y] != null) {
+    } else if (this.obj[x][y] != null) {
       return this.obj[x][y].ch;
     }
     return this.terrain[x][y].ch;
@@ -299,6 +298,8 @@ class Level {
   attr_at(x, y) {
     if (this.cr[x][y] != null) {
       return this.cr[x][y].attr;
+    } else if (this.obj[x][y] != null) {
+      return this.obj[x][y].attr;
     }
     return null;
   }

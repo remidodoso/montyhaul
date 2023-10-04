@@ -20,6 +20,8 @@ class Cr {
     this.magic = null;
     this.potion = null;
     this.misc = null;
+
+    this.tickled = 0;
   }
 
   //
@@ -72,6 +74,23 @@ class Cr {
         more(this.name + ' drinks ' + drinkable.name + '.');
       } else {
         more('You hear drinking.');
+      }
+    }
+  }
+
+  is_healed() {
+    if (this.tickled > 0) {
+      if (this == U) {
+        more('You are healed!');
+        this.tickled = 0;
+      } else {
+        if (U.can_see(this.x, this.y)) {
+          more(this.name + ' is healed!');
+          this.tickled = 0;
+        } else {
+          more('You hear pleasant musical chimes.');
+          this.tickled = 0;
+        }
       }
     }
   }
@@ -181,7 +200,7 @@ class Cr {
         cr.dead = true;
         this.move_to_raw(x, y);
       } else {
-        U.died();
+        more("You weakly slap " + cr.name + ". Better find a weapon!");
       }
     } else {
       if (cr == U) {

@@ -1,7 +1,6 @@
 class You extends Cr {
   constructor() {
     super('@', 'You', 'cyan');
-    this.tickled = 0;
   }
   use_turn() {
     if (this.tickled > 0 && Math.random() > 0.95) {

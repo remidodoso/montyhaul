@@ -304,7 +304,6 @@ function _handle_keypress(e) {
     var o;
     if ((o = G.level.obj_at(U.x, U.y)) != null) {
       U.pick_up(o);
-      //o.pick_up(U);
     } else {
       more("There's nothing here to pick up.");
     }
@@ -416,7 +415,8 @@ function init() {
   g_cr_at = new_2d(G.MAP_X, G.MAP_Y, null);
   g_obj_at = new_2d(G.MAP_X, G.MAP_Y, null);
   U = new You();
-  U.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
+  U.move_to(5, 5);
+//  U.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
 
 
 
@@ -438,10 +438,14 @@ function init() {
     G.monsters.push(gnome);
   }
 
-  var food = new Food().place_at(5, 5);
-  U.potion = new ImprovisedExplosivePotion();
-  U.weapon = new Sword();
-  U.magic = new Wand();
+  var food = new Food().place_at(10, 5);
+  var potion = new VitaminDrink().place_at(7, 7);
+  var wand = new Wand().place_at(5, 10);
+  var weapon = new Sword().place_at(3,3);
+  new Gold().place_at(2, 2);
+//  U.potion = new ImprovisedExplosivePotion();
+//  U.weapon = new Sword();
+//  U.magic = new Wand();
 
   G.map.update();
   update_screen_backing();

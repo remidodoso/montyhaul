@@ -99,7 +99,17 @@ class Edible extends Obj {
 }
 class Misc extends Obj {
 }
+class Moolah extends Obj {
+}
 
+class Gold extends Moolah {
+  constructor() {
+    super();
+    this.ch = '$';
+    this.name = 'gold';
+    this.attr = 'yellow';
+  }
+}
 class Sword extends Weapon {
   constructor() {
     super();
@@ -130,6 +140,19 @@ class Potion extends Magic_Drink {
   quaffed_by(cr) {
     cr.drinks(this);
     more('Nothing happens.');
+    cr.potion = null;
+    this.destroy();
+  }
+}
+
+class VitaminDrink extends Potion {
+  constructor() {
+    super();
+    this.name = 'an expensive vitamin drink';
+  }
+  quaffed_by(cr) {
+    cr.drinks(this);
+    cr.is_healed();
     cr.potion = null;
     this.destroy();
   }
