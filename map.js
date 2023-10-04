@@ -184,7 +184,6 @@ function update_map_to_screen_backing() {
   });
   if (map.has_overlay()) {
     map.overlay_vec.forEach((c) => {
-      //   for each (let c in map.overlay_vec) {
       let [x, y] = c;
       let [x0, y0] = [x + x_offset, y + y_offset];
       g_screen_backing[x0][y0] = map.sym_at(x, y);

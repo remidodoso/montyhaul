@@ -163,27 +163,21 @@ function zap(x, y, xinc, yinc) {
     G.map.write_cell(x, y, '*', '#fa0');
     let cr = G.level.cr_at(x, y);
     if (cr != null) {
+      // TBD show the symbol for the creature briefly in the animation
       cr.vaporize();
     }
-    //
-    // Right now, in Firefox, the zap animation (a line of asterisks)
-    // is sometimes not being displayed. The mod divisor below
-    // controls how many asterisks are displayed at a time. This was
-    // set to 4, but often the animation wasn't visible. So I set it to
-    // 2 here. Still this seems not to work intermittently.
-    //
-    if (i % 2 == 0) { g_draw_sets.new_set() };
+    /*
+     * The argument to new_set is a delay in msec. This makes the
+     * animation leisurely enough that it will be seen.
+     */
+    if (i % 4 == 0) { g_draw_sets.new_set(25) };
     update_map_to_screen_backing();
     update_screen();
     x += xinc;
     y += yinc;
   }
-  /*
-   * parameter is delay in ms
-   */
-  g_draw_sets.new_set(50);
+  g_draw_sets.new_set(25);
   save_cell.forEach((c) => {
-    //  for each (let c in save_cell) {
     G.map.set_known(c[0], c[1]);
     G.map.update_cell(c[0], c[1]);
     // G.map.write_cell(c[0], c[1], c[2], c[3]);
@@ -320,6 +314,7 @@ function _handle_keypress(e) {
   }
   UI.mon_move();
   U.use_turn();
+//  message("Welcome to Montyhaul. Press '?' for help.");
   do_status_line();
 
   e.cancelBubble = true;
@@ -378,9 +373,9 @@ function help() {
     'h, j, k, l, y, u, b, n: move (like in vi, + diagonal)                ');
   G.pager.writeln(
     'd: drop something                                                    ');
-    G.pager.writeln(
+  G.pager.writeln(
     'q: quaff a magical drink                                             ');
-    G.pager.writeln(
+  G.pager.writeln(
     ',: pick up something                                                 ');
   G.pager.writeln(
     'i: see your inventory                                                ');
@@ -450,7 +445,49 @@ function init() {
   G.map.update();
   update_screen_backing();
   update_screen();
+  // TBD this is a hack to make sure the first line (status line) is displayed at
+  // startup ... but really this is just wrong; the first line should be used for
+  // short messages and the status line(s) should be below the map.
+  message("_");
   welcome();
   g_draw_sets.draw();
   // document.onkeypress = handle_keypress;
 }
+
+/*
+ * Here is how it should look ... 
+ *   message line
+ *   21 rows of map
+ *   status line #1
+ *   status line #2
+ * 24 lines total
+ * 
+ * ----top of screen----
+ * You swap places with Slinky.
+ * 
+ * 
+ * 
+ *                                       -----
+ *                                       #.<..|
+ *                                       #|...|
+ *                                       #-----
+ *                                     ###
+ *                         ------   ####
+ *                         |....-#######
+ *                         |....|
+ *                         |....|           ###
+ *                         |.....###########  #
+ *                         .....|          #  ##
+ *                         ------              ###
+ *                                           ----.-
+ *                                          #|.@..|
+ *                                          #-....|
+ *                                           |....|
+ *                                           ------
+ * 
+ * Joseph the Hatamoto    St:18 Dx:16 Co:17 In:10 Wi:8 Ch:6  Lawful
+ * Dlvl:1  $:58 HP:15(15) Pw:2(2) AC:4  Exp:1
+ * ----bottom of screen----
+ */
+
+
