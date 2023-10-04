@@ -1,7 +1,5 @@
 # montyhaul
 
-* Note: At the moment, the main branch does run, but with some glitches. Among what are probably several issues, wand animation is horked. I don't have time to deal with that right now....
-
 <code>montyhaul</code> is a toy roguelike game implemented entirely in server-side JavaScript.
 
 It was originally written c. 2012(?) for Firefox. ECMAScript standardization broke some things (mostly 'for each'). 
