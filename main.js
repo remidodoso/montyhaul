@@ -1,37 +1,43 @@
 var U = null;
 
-var g_screen_backing_dirty_a;
-
 var g_map_needs_update = false;
 
-var g_draw_set;
-var g_draw_sets;
-
-var g_messages;
+function message(msg) {
+  G.message = msg;
+  for (var i = 0; i < G.message_buffer.length; i++) {
+    if (i < G.message.length) {
+      G.message_buffer[i] = G.message.charAt(i);
+    } else {
+      G.message_buffer[i] = '\u2007';
+    }
+  }
+  G.screen.update_message_on_screen_backing();
+  G.screen.update_screen();
+}
 
 function more(msg) {
-  g_draw_sets.new_set();
-  g_draw_set.set_wait_for_space();
+  G.draw_sets.new_set();
+  G.draw_set.set_wait_for_space();
   message(msg + ' -more-');
-  g_draw_sets.new_set();
+  G.draw_sets.new_set();
   do_status_line();
 }
 
 function do_more() {
-  if (g_messages.length == 0) {
+  if (G.messages.length == 0) {
     G.more_waiting_for_space = false;
     return false;
   }
-  g_message = g_messages.pop() + ' -more-';
-  for (var i = 0; i < g_message_buffer.length; i++) {
-    if (i < g_message.length) {
-      g_message_buffer[i] = g_message.charAt(i);
+  G.message = G.messages.pop() + ' -more-';
+  for (var i = 0; i < G.message_buffer.length; i++) {
+    if (i < G.message.length) {
+      G.message_buffer[i] = G.message.charAt(i);
     } else {
-      g_message_buffer[i] = ' ';
+      G.message_buffer[i] = ' ';
     }
   }
-  update_message_on_screen_backing();
-  update_screen();
+  G.screen.update_message_on_screen_backing();
+  G.screen.update_screen();
   G.more_waiting_for_space = true;
   return true;
 }
@@ -63,92 +69,6 @@ function new_2d(x, y, init) {
   return a;
 }
 
-function create_screen_table() {
-  g_screen_table = new_2d(G.DSPL_X, G.DSPL_Y, null);
-  g_screen_table_el = document.createElement('table');
-  for (var col = 0; col < G.DSPL_X; col++) {
-    var col_el = document.createElement('col');
-    col_el.setAttribute('width', '5px');
-    g_screen_table_el.appendChild(col_el);
-  }
-  for (var row = 0; row < G.DSPL_Y; row++) {
-    var tr = document.createElement('tr');
-    for (var col = 0; col < G.DSPL_X; col++) {
-      var td = document.createElement('td');
-      var text = document.createTextNode("\u2007");
-      g_screen_table[col][row] = text;
-      td.appendChild(text);
-      tr.appendChild(td);
-    }
-    g_screen_table_el.appendChild(tr);
-  }
-  var map = document.getElementById('map');
-  map.parentNode.replaceChild(g_screen_table_el, map);
-}
-
-function create_screen_backing() {
-  g_screen_backing = new_2d(G.DSPL_X, G.DSPL_Y, '*');
-  g_screen_backing_dirty = new_2d(G.DSPL_X, G.DSPL_Y, 1);
-  g_screen_backing_attr = new_2d(G.DSPL_X, G.DSPL_Y, null);
-  g_screen_backing_dirty_a = new Array();
-  for (var x = 0; x < G.DSPL_X; x++) {
-    for (var y = 0; y < G.DSPL_Y; y++) {
-      g_screen_backing_dirty_a.push([x, y]);
-    }
-  }
-}
-
-function set_screen_backing_dirty(x, y) {
-  if (g_screen_backing_dirty[x][y] == 0) {
-    g_screen_backing_dirty[x][y] = 1;
-    g_screen_backing_dirty_a.push([x, y]);
-  }
-}
-
-function update_screen() {
-  for (let i in g_screen_backing_dirty_a) {
-    let [x, y] = g_screen_backing_dirty_a[i];
-    let parent = g_screen_table[x][y].parentNode;
-    g_draw_set.add_action([x, y, g_screen_backing[x][y], parent, g_screen_backing_attr[x][y]]);
-    g_screen_backing_dirty[x][y] = 0;
-  }
-  g_screen_backing_dirty_a = new Array();
-}
-
-function update_message_on_screen_backing() {
-  for (let x = 0; x < g_message_buffer.length; x++) {
-    if (g_message_buffer[x] != g_screen_backing[x][0]) {
-      g_screen_backing[x][0] = g_message_buffer[x];
-      set_screen_backing_dirty(x, 0);
-    }
-  }
-}
-
-//
-// Update the screen backing -
-// The main elements here are the map dspl and the status
-// line (and whatever else TBD), all of which are handled 
-// separately.
-//
-function update_screen_backing() {
-  update_map_to_screen_backing();
-  update_message_on_screen_backing();
-  update_screen();
-}
-
-function message(msg) {
-  g_message = msg;
-  for (var i = 0; i < g_message_buffer.length; i++) {
-    if (i < g_message.length) {
-      g_message_buffer[i] = g_message.charAt(i);
-    } else {
-      g_message_buffer[i] = ' ';
-    }
-  }
-  update_message_on_screen_backing();
-  update_screen();
-}
-
 function zap(x, y, xinc, yinc) {
   let save_cell = new Array();
   let i = 0;
@@ -170,19 +90,18 @@ function zap(x, y, xinc, yinc) {
      * The argument to new_set is a delay in msec. This makes the
      * animation leisurely enough that it will be seen.
      */
-    if (i % 4 == 0) { g_draw_sets.new_set(25) };
-    update_map_to_screen_backing();
-    update_screen();
+    if (i % 4 == 0) { G.draw_sets.new_set(25) };
+    G.map.update_map_to_screen_backing();
+    G.screen.update_screen();
     x += xinc;
     y += yinc;
   }
-  g_draw_sets.new_set(25);
+  G.draw_sets.new_set(25);
   save_cell.forEach((c) => {
     G.map.set_known(c[0], c[1]);
     G.map.update_cell(c[0], c[1]);
-    // G.map.write_cell(c[0], c[1], c[2], c[3]);
-    update_map_to_screen_backing();
-    update_screen();
+    G.map.update_map_to_screen_backing();
+    G.screen.update_screen();
   });
   return;
 }
@@ -213,7 +132,7 @@ function do_status_line() {
 
 function handle_keypress(e) {
   _handle_keypress(e);
-  g_draw_sets.draw();
+  G.draw_sets.draw();
 }
 
 
@@ -229,8 +148,8 @@ function _handle_keypress(e) {
       G.map.update();
       G.map.reset_visibility();
       U.compute_los();
-      update_screen_backing();
-      update_screen();
+      G.screen.update_screen_backing();
+      G.screen.update_screen();
       G.pager_waiting_for_space = false;
     }
     return;
@@ -399,14 +318,18 @@ function init() {
   K = new K();
   G = new G();
   UI = new UI();
-  create_screen_backing();
-  create_screen_table();
-  g_draw_sets = new DrawSets();
+
+  G.screen = new Screen();
+
   g_more_mode = false;
   g_messages = new Array();
   g_map_needs_update = false;
-  g_message_buffer = new_1d(G.DSPL_X, ' ');
+  g_message_buffer = new_1d(G.DSPL_X, '\u2007');
   g_message = 'Welcome to MontyHaul';
+
+  G.message_buffer = new_1d(G.DSPL_X, '\u2007');
+  G.message = 'Welcome to MontyHaul';
+
   g_cr_at = new_2d(G.MAP_X, G.MAP_Y, null);
   g_obj_at = new_2d(G.MAP_X, G.MAP_Y, null);
   U = new You();
@@ -443,14 +366,14 @@ function init() {
 //  U.magic = new Wand();
 
   G.map.update();
-  update_screen_backing();
-  update_screen();
+  G.screen.update_screen_backing();
+  G.screen.update_screen();
   // TBD this is a hack to make sure the first line (status line) is displayed at
   // startup ... but really this is just wrong; the first line should be used for
   // short messages and the status line(s) should be below the map.
-  message("_");
+//  message("_");
   welcome();
-  g_draw_sets.draw();
+  G.draw_sets.draw();
   // document.onkeypress = handle_keypress;
 }
 

@@ -52,7 +52,6 @@ class Map {
     this.overlay_vec = new Array();
     this.visible = new_2d(this.x_dim, this.y_dim, false);
     this.visible_vec = new Array();
-    return;
   }
   sym_at(x, y) { return this.sym[x][y]; }
   dirty_at(x, y) { return this.dirty[x][y]; }
@@ -158,40 +157,42 @@ class Map {
       }
     }
   }
-}
-function update_map_to_screen_backing() {
-  let x_offset = 0;
-  let y_offset = 1;
-  let map = G.map;
-  map.get_dirty_vec().forEach((c) => {
-    //  for each (let c in map.get_dirty_vec()) {
-    let [x, y] = c;
-    if (map.sym_at(x, y) != g_screen_backing[x + x_offset][y + y_offset] ||
-      map.attr_at(x, y) != g_screen_backing_attr[x + x_offset][y + y_offset] ||
-      !map.visible[x][y]) {
-      if (map.visible[x][y]) {
-        g_screen_backing[x + x_offset][y + y_offset] = map.sym_at(x, y);
-        g_screen_backing_attr[x + x_offset][y + y_offset] = map.attr_at(x, y);
-      } else if (map.known[x][y]) {
-        g_screen_backing[x + x_offset][y + y_offset] = G.level.known_sym_at(x, y);
-        g_screen_backing_attr[x + x_offset][y + y_offset] = '#666';
-      } else {
-        g_screen_backing[x + x_offset][y + y_offset] = '~';
-        g_screen_backing_attr[x + x_offset][y + y_offset] = '#000';
-      }
-      set_screen_backing_dirty(x + x_offset, y + y_offset);
-    }
-  });
-  if (map.has_overlay()) {
-    map.overlay_vec.forEach((c) => {
+  update_map_to_screen_backing() {
+    let x_offset = 0;
+    let y_offset = 1;
+    let map = G.map;
+    let screen = G.screen;
+    map.get_dirty_vec().forEach((c) => {
+      //  for each (let c in map.get_dirty_vec()) {
       let [x, y] = c;
-      let [x0, y0] = [x + x_offset, y + y_offset];
-      g_screen_backing[x0][y0] = map.sym_at(x, y);
-      g_screen_backing_attr[x0][y0] = map.attr_at(x, y);
-      set_screen_backing_dirty(x0, y0);
+      if (map.sym_at(x, y) != G.screen.screen_backing[x + x_offset][y + y_offset] ||
+        map.attr_at(x, y) !=  G.screen.screen_backing_attr[x + x_offset][y + y_offset] ||
+        !map.visible[x][y]) {
+        if (map.visible[x][y]) {
+          screen.screen_backing[x + x_offset][y + y_offset] = map.sym_at(x, y);
+          screen.screen_backing_attr[x + x_offset][y + y_offset] = map.attr_at(x, y);
+        } else if (map.known[x][y]) {
+          screen.screen_backing[x + x_offset][y + y_offset] = G.level.known_sym_at(x, y);
+          screen.screen_backing_attr[x + x_offset][y + y_offset] = '#666';
+        } else {
+          screen.screen_backing[x + x_offset][y + y_offset] = '~';
+          screen.screen_backing_attr[x + x_offset][y + y_offset] = '#000';
+        }
+        screen.set_screen_backing_dirty(x + x_offset, y + y_offset);
+      }
     });
-    map.reset_overlay();
+    if (map.has_overlay()) {
+      map.overlay_vec.forEach((c) => {
+        let [x, y] = c;
+        let [x0, y0] = [x + x_offset, y + y_offset];
+        screen.screen_backing[x0][y0] = map.sym_at(x, y);
+        screen.screen_backing_attr[x0][y0] = map.attr_at(x, y);
+        screen.set_screen_backing_dirty(x0, y0);
+      });
+      map.reset_overlay();
+    }
+    map.clear_dirty();
   }
-  G.map.clear_dirty();
+  
 }
 

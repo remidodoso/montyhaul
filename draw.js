@@ -1,19 +1,19 @@
 class DrawSets {
   constructor() {
     this.sets = new Array();
-    g_draw_set = this.new_set();
+    this.new_set();
   }
   new_set(time) {
     let set = new DrawSet(time);
-    g_draw_set = set;
     this.sets.push(set);
+    G.draw_set = set;
     return set;
   }
   _DrawSets_wait_for_space(e) {
     let ch = String.fromCharCode(e.charCode);
     if (ch == ' ') {
       document.onkeypress = null;
-      g_draw_sets.draw_next();
+      G.draw_sets.draw_next();
     }
   }
   draw_next() {
@@ -23,11 +23,10 @@ class DrawSets {
        * normal keypress handler.
        */
       document.onkeypress = handle_keypress;
-      g_draw_set = this.new_set();
+      G.draw_set = this.new_set();
       return;
     }
-    let t = this;
-    let set = t.sets.shift();
+    let set = this.sets.shift();
     set.do_draw();
     /*
      * If the current set has "wait for space" set, then set a
@@ -38,6 +37,7 @@ class DrawSets {
       document.onkeypress = this._DrawSets_wait_for_space;
       return;
     } else {
+      let t = this;
       setTimeout(function () { t.draw_next(); }, set.time);
     }
   }
@@ -65,7 +65,7 @@ class DrawSet {
   }
   do_draw() {
     this.action.forEach((a) => {
-      g_screen_table[a[0]][a[1]].nodeValue = a[2];
+      G.screen.screen_table[a[0]][a[1]].nodeValue = a[2];
       a[3].style.color = a[4];
     });
   }

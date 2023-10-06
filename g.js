@@ -17,19 +17,20 @@ g_map_dirty = null;
 g_cr_at = null;
 g_obj_at = null;
 
-g_message = null;
-g_message_buffer = new Array();
-
 g_more_mode = null;
 
 class G {
   constructor() {
     this.DSPL_X = 80;
-    this.DSPL_Y = 25;
+    this.DSPL_Y = 24;
     this.MAP_X = 80;
-    this.MAP_Y = 24;
+    this.MAP_Y = 21;
 
     this.dead = false;
+
+    this.draw_set = null;
+    this.draw_sets = new DrawSets();
+    this.draw_set = this.draw_sets.sets[0];
 
     this.map = new Map(this.MAP_X, this.MAP_Y);
     this.level = new Level(this.MAP_X, this.MAP_Y);
@@ -44,6 +45,13 @@ class G {
 
     this.monsters = new Array();
 
+    this.message = null;
+    this.messages = null;
+    this.message_buffer = new Array();
+
+    this.screen = null;
+
+    this.map_dirty = null;
   }
 };
 

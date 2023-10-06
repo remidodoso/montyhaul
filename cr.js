@@ -178,8 +178,8 @@ class Cr {
     if (this == U) {
       U.compute_los();
     }
-    update_map_to_screen_backing();
-    update_screen();
+    G.map.update_map_to_screen_backing();
+    G.screen.update_screen();
   }
   vaporize(cr) {
     more(this.name + ' is vaporized!');

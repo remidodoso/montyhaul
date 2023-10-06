@@ -44,8 +44,8 @@ class Obj {
       this.y = y;
     }
     // update_map();
-    update_screen_backing();
-    update_screen();
+    G.screen.update_screen_backing();
+    G.screen.update_screen();
   }
   pick_up(cr) {
     if (cr.invent.length > 0) {

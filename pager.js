@@ -43,8 +43,8 @@ class Pager {
     this.text = new String();
     G.pager_last = true;
     G.pager_waiting_for_space = true;
-    update_map_to_screen_backing();
-    update_screen();
+    G.map.update_map_to_screen_backing();
+    G.screen.update_screen();
   }
 }
 

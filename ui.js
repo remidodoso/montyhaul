@@ -32,7 +32,7 @@ class UI {
   }
   get_card_dir() {
     message('Direction? [hjkl]');
-    g_draw_sets.draw();
+    G.draw_sets.draw();
     this.char_handler = function (ch) {
       switch (ch) {
         case 'h': case 'j': case 'k': case 'l':
@@ -45,7 +45,7 @@ class UI {
   }
   get_eight_dir() {
     message('Direction? [hjklyubn]');
-    g_draw_sets.draw();
+    G.draw_sets.draw();
     this.char_handler = function(ch) {
       switch (ch) {
         case 'h': case 'j': case 'k': case 'l':
