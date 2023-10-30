@@ -19,12 +19,22 @@ g_obj_at = null;
 
 g_more_mode = null;
 
+var G_DSPL_X = 80;
+
 class G {
   constructor() {
     this.DSPL_X = 80;
     this.DSPL_Y = 24;
     this.MAP_X = 80;
     this.MAP_Y = 21;
+
+    this.MESSAGE_Y = 0;
+    this.MAP_TOP_Y = 1;
+    this.STATUS1_Y = 22;
+    this.STATUS2_Y = 23;    
+
+    this.status1 = new Status1();
+    this.status2 = new Status2();
 
     this.dead = false;
 
@@ -49,10 +59,14 @@ class G {
     this.messages = null;
     this.message_buffer = new Array();
 
+    this.status1_buffer = new Array();
+    this.status2_buffer = new Array();
+
     this.screen = null;
 
     this.map_dirty = null;
   }
+  DSPL_X_() { return 80; }
 };
 
 

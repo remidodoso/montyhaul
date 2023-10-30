@@ -12,8 +12,9 @@
 // ------------------------------------------------- visible 
 //
 // ------------------------------------------------- cr_at
-// ------------------------------------------------- obj_at
-// ------------------------------------------------- trap_at (?)
+// ------------------------------------------------- obj_at (WIP - to be removed)
+// ------------------------------------------------- inv_at (WIP - a list)
+// ------------------------------------------------- trap_at (? TBD)
 // ================================================= terrain
 //
 //
@@ -29,6 +30,12 @@ class Level {
     this.y_dim = y_dim;
     this.cr = new_2d(this.x_dim, this.y_dim, null);
     this.obj = new_2d(this.x_dim, this.y_dim, null);
+    //
+    // WIP ...
+    // let's see if I can just "slide in" proper inventory
+    // This will be the list of objects present at this location
+    //
+    this.inv = new_2d(this.x_dim, this.y_dim, null);
     this.create_terrain();
   }
 
@@ -278,23 +285,120 @@ class Level {
     this.obj[x][y] = obj;
     return obj;
   }
+
+  //
+  // WIP TBD
+  // 
+  // Maintain empty tile inventory lists as null. This will also return null
+  // for an empty tile inventory. In case an undefined slips in there somehow,
+  // use a non-strict comparison, noted as // NS
+  //
+  inv_at(x, y) {
+    if (this.inv[x][y] == null) { // NS
+      return null;
+    } else {
+      return this.inv[x][y];
+    }
+  }
+  
+  push_inv_at(x, y, obj) {
+    if (obj == null) { // NS
+      return this.inv[x][y];
+    }
+    if (this.inv[x][y] == null) { // NS
+      let inv = new Array(obj);
+      this.inv[x][y] = inv;
+    } else {
+      this.inv[x][y].push(obj);
+    }
+    obj.set_parent(this.inv[x][y]);
+    return this.inv[x][y];
+  }
+
+
+  
+  /*
+   * Top object in tile inventory
+   */
+  peek_inv_at(x, y) {
+    if (this.inv[x][y] == null) { // NS
+      return null;
+    } else {
+      return this.inv[x][y][0];
+    }
+  }
+
+  /*
+   * The whole tile inventory
+   *
+   * TBD I feel like this should be a shallow copy, and restrict all
+   * changes to a tile inventory to methods. For now it's just the
+   * actual list.
+   */
+  get_inv_at(x, y, flags) {
+    //
+    // TBD flags will be for some kind of filtering, NIY
+    //
+    if (this.inv[x][y] == null) { // NS
+      return null;
+    } else {
+      return this.inv[x][y];
+    }
+  }
+
+  /*
+   * terrain_sym_at returns the symbol corresponding to
+   * terrain at a particular tile. This currently includes
+   * only the map terrain, but TBD should this include
+   * things like traps, when they are implemented?
+   */
   terrain_sym_at(x, y) {
     return this.terrain[x][y].ch;
   }
+
+  /*
+   * known_sym_at returns the symbol to be displayed if
+   * the tile is "known" (previously seen) but not currently
+   * seen. Right now, this is whatever is there, minus
+   * a creature.
+   * 
+   * TBD however, this needs to be different -- it needs to
+   * be what was last actually seen.
+   */
   known_sym_at(x, y) {
     if (this.obj[x][y] != null) {
       return this.obj[x][y].ch;
     }
-    return this.terrain[x][y].ch;
-  }
-  sym_at(x, y) {
-    if (this.cr[x][y] != null) {
-      return this.cr[x][y].ch;
-    } else if (this.obj[x][y] != null) {
-      return this.obj[x][y].ch;
+    // WIP adding tile inventories
+    let o = this.peek_inv_at(x, y);
+    if (o !== null) {
+      return o.ch;
     }
     return this.terrain[x][y].ch;
   }
+
+  /*
+   * sym_at returns the symbol to be displayed if the tile
+   * is currently visible.
+   */
+  sym_at(x, y) {
+    if (this.cr[x][y] != null) {
+      return this.cr[x][y].ch;
+    }
+    if (this.obj[x][y] != null) {
+      return this.obj[x][y].ch;
+    }
+    // WIP adding tile inventories
+    let o = this.peek_inv_at(x, y);
+    if (o !== null) {
+      return o.ch;
+    }
+    return this.terrain[x][y].ch;
+  }
+
+  /*
+   *
+   */
   attr_at(x, y) {
     if (this.cr[x][y] != null) {
       return this.cr[x][y].attr;

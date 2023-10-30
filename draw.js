@@ -1,3 +1,14 @@
+/*
+ * See screen.js for the details of how the game map and messages are
+ * displayed.
+ *
+ * However, the only code in the entire game that actually *updates*
+ * the screen table, which is how changes are actually displayed to
+ * the user, is DrawSet.do_draw(), and consequently, at a higher level,
+ * DrawSets.draw().
+ *
+ */
+
 class DrawSets {
   constructor() {
     this.sets = new Array();

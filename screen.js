@@ -109,11 +109,30 @@ class Screen {
     this.screen_backing_dirty_a = new Array();
   }
   
+  update_from_dirty() {
+    for (let i in this.screen_backing_dirty_a) {
+      let [x, y] = this.screen_backing_dirty_a[i];
+      let parent = this.screen_table[x][y].parentNode;
+      G.draw_set.add_action([x, y, this.screen_backing[x][y], parent, this.screen_backing_attr[x][y]]);
+      this.screen_backing_dirty[x][y] = 0;
+    }
+    this.screen_backing_dirty_a = new Array();
+  }
+
   update_message_on_screen_backing() {
     for (let x = 0; x < G.message_buffer.length; x++) {
       if (G.message_buffer[x] != this.screen_backing[x][0]) {
         this.screen_backing[x][0] = G.message_buffer[x];
         this.set_screen_backing_dirty(x, 0);
+      }
+    }
+  }
+
+  update_status_on_screen_backing() {
+    for (let x = 0; x < G.status1_buffer.length; x++) {
+      if (G.status1_buffer[x] != this.screen_backing[x][22]) {
+        this.screen_backing[x][22] = G.status1_buffer[x];
+        this.set_screen_backing_dirty(x, 22);
       }
     }
   }
@@ -127,6 +146,7 @@ class Screen {
   update_screen_backing() {
     G.map.update_map_to_screen_backing();
     this.update_message_on_screen_backing();
+    this.update_status_on_screen_backing();
     this.update_screen();
   }
 

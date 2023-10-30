@@ -12,6 +12,8 @@ class Cr {
     this.moved = 0;
     this.sight_radius = 8;
 
+    this.hp = 1;
+
     this.age = 0;
     this.turns = 0;
 

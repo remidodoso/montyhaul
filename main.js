@@ -1,5 +1,4 @@
 var U = null;
-
 var g_map_needs_update = false;
 
 function message(msg) {
@@ -17,8 +16,9 @@ function message(msg) {
 
 function more(msg) {
   G.draw_sets.new_set();
-  G.draw_set.set_wait_for_space();
-  message(msg + ' -more-');
+//  G.draw_set.set_wait_for_space();
+  message(msg);
+//  message(msg + ' -more-');
   G.draw_sets.new_set();
   do_status_line();
 }
@@ -28,7 +28,7 @@ function do_more() {
     G.more_waiting_for_space = false;
     return false;
   }
-  G.message = G.messages.pop() + ' -more-';
+  G.message = G.messages.pop(); //+ ' -more-';
   for (var i = 0; i < G.message_buffer.length; i++) {
     if (i < G.message.length) {
       G.message_buffer[i] = G.message.charAt(i);
@@ -38,8 +38,32 @@ function do_more() {
   }
   G.screen.update_message_on_screen_backing();
   G.screen.update_screen();
-  G.more_waiting_for_space = true;
+//  G.more_waiting_for_space = true;
   return true;
+}
+
+function temp_update_status1() {
+  return;
+  let status1_msg = '[';
+  if (U.x < 10) { status1_msg += ' '; }
+  status1_msg += U.x + ', ';
+  if (U.y < 10) { status1_msg += ' '; }
+  status1_msg += U.y + ']';
+  status1_msg += ' Tickled: ' + U.how_tickled();
+  for (var i = 0; i < G.status1_buffer.length; i++) {
+    if (i < status1_msg.length) {
+      G.status1_buffer[i] = status1_msg.charAt(i);
+    } else {
+      G.status1_buffer[i] = '\u2007';
+    }
+  }
+  G.screen.update_status_on_screen_backing();
+  G.screen.update_screen();
+}
+
+function temp_update_status2() {
+  let s = `[${U.x < 10 ? ' ' + U.x : U.x}, ${U.y < 10 ? ' ' + U.y : U.y}]    Tickled: ${U.how_tickled()}`;
+  G.status2.write(s);
 }
 
 function tile_solid(tile) {
@@ -117,14 +141,6 @@ function do_status_line() {
   let o = G.level.obj_at(U.x, U.y);
   if (o != null) {
     message('You see ' + o.name + ' here.');
-  } else {
-    let msg = '[';
-    if (U.x < 10) { msg += ' '; }
-    msg += U.x + ', ';
-    if (U.y < 10) { msg += ' '; }
-    msg += U.y + ']';
-    msg += ' Tickled: ' + U.how_tickled();
-    message(msg);
   }
   //g_draw_sets.draw();
 }
@@ -235,6 +251,8 @@ function _handle_keypress(e) {
   U.use_turn();
 //  message("Welcome to Montyhaul. Press '?' for help.");
   do_status_line();
+  temp_update_status1();
+  temp_update_status2();
 
   e.cancelBubble = true;
   if (e.stopPropagation) e.stopPropagation();
@@ -248,32 +266,24 @@ function welcome() {
   G.pager.writeln(
     '                                                                     ');
   G.pager.writeln(
-    'MontyHaul is an experimental roguelike game implemented entirely in');
+    'MontyHaul is an experimental roguelike game implemented entirely in  ');
   G.pager.writeln(
-    'client-side Javascript. This is still completely true!');
+    'client-side Javascript.');
   G.pager.writeln('');
   G.pager.writeln(
-    'It is (not, LOL) under continual development for now, so check back ');
-  G.pager.writeln(
-    "if you're a glutton for disappointment and frustration.")
+    'Development is completely intermittent on the scale of years.');
   G.pager.writeln('');
   G.pager.writeln(
-    'MontyHaul is free for you to use but it is NOT free software at this');
+    'MontyHaul is free for you to use and I suppose you can do whatever you');
   G.pager.writeln(
-    'time; you may study the source code but you may not copy it.');
+    "want with the code. Good luck with that. It's your tech interview,");
   G.pager.writeln(
-    "Or you could copy it because it's a fucking mess as I'm typing this");
-  G.pager.writeln(
-    "and it's your tech interview, not mine.");
+    "not mine.");
   G.pager.writeln('');
   G.pager.writeln(
     'Anyway, for help during the game, press the "?" key.');
   G.pager.writeln('');
-  G.pager.writeln(
-    'NO LONGER NEW: Try out the "z" (Zap!) key. It does still zap, though!');
-  G.pager.writeln('');
-  G.pager.writeln(
-    '(Press SPACE to continue.)');
+    '(Press SPACE to continue.)';
   G.pager.show();
 }
 
@@ -322,13 +332,13 @@ function init() {
   G.screen = new Screen();
 
   g_more_mode = false;
-  g_messages = new Array();
   g_map_needs_update = false;
-  g_message_buffer = new_1d(G.DSPL_X, '\u2007');
-  g_message = 'Welcome to MontyHaul';
 
   G.message_buffer = new_1d(G.DSPL_X, '\u2007');
   G.message = 'Welcome to MontyHaul';
+
+  G.status1_buffer = new_1d(G.DSPL_X, '\u2007');
+  G.status2_buffer = new_1d(G.DSPL_X, '\u2007');
 
   g_cr_at = new_2d(G.MAP_X, G.MAP_Y, null);
   g_obj_at = new_2d(G.MAP_X, G.MAP_Y, null);
@@ -358,9 +368,11 @@ function init() {
 
   var food = new Food().place_at(10, 5);
   var potion = new VitaminDrink().place_at(7, 7);
-  var wand = new Wand().place_at(5, 10);
+  var wand = new WandOfIncineration().place_at(5, 10);
   var weapon = new Sword().place_at(3,3);
   new Gold().place_at(2, 2);
+
+  G.level.push_inv_at(8, 8, new Food());
 //  U.potion = new ImprovisedExplosivePotion();
 //  U.weapon = new Sword();
 //  U.magic = new Wand();

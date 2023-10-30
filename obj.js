@@ -15,6 +15,8 @@ class Obj {
     this.x = -1;
     this.y = -1;
     this.attr = '';
+    // WIP NIY tile inventory, will start by making parent the tile inventory if
+    // this object is on the floor
     this.parent = null; // NYI, presumably Cr or container or ??
   }
   destroy() {
@@ -25,10 +27,22 @@ class Obj {
       update_screen_backing();
       update_screen();
     }
-    // incomplete, need to clean up whatever might own it
+    // TBD incomplete, need to clean up whatever might own it
     // probably need the Obj to keep copies of the links to the Obj
     // from the parent/container
   }
+
+  //
+  // TBD WIP parent will eventually be one of a tile inventory, a
+  // Cr, or container ... it should probably never be null
+  //
+  // This is just a setter and not intended to handle moving
+  // from one inventory to another
+  //
+  set_parent(parent) {
+    this.parent = parent;
+  }
+
   place_at(x, y) {
     if (this.x == x && this.y == y) {
       return;
@@ -47,6 +61,34 @@ class Obj {
     G.screen.update_screen_backing();
     G.screen.update_screen();
   }
+  // WIP new for tile inventory
+  place_at_inv(x, y) {
+    /*
+     * An Obj will have a this.x/this.y only if it is lying
+     * on the floor ... if it's in a container, those values will
+     * be something "off map"
+     */
+    // WIP TBD if the object is already here, it should probably be
+    // moved to the top of the pile, but ignore for now
+    if (this.x == x && this.y == y) {
+      return;
+    }
+    // WIP TBD 
+    if (G.map.is_on(this.x, this.y)) {
+      G.level.set_obj_at(this.x, this.y, null);
+      G.map.set_dirty(this.x, this.y);
+    }
+    if (G.map.is_on(x, y)) {
+      G.level.set_obj_at(x, y, this);
+      G.map.set_dirty(x, y);
+      this.x = x;
+      this.y = y;
+    }
+    // update_map();
+    G.screen.update_screen_backing();
+    G.screen.update_screen();
+  }
+
   pick_up(cr) {
     if (cr.invent.length > 0) {
       more("You're already carrying something.");
@@ -129,6 +171,13 @@ class Wand extends Magic_Stick {
     super();
     this.ch = '/';
     this.name = 'a wand';
+  }
+}
+class WandOfIncineration extends Wand {
+  constructor() {
+    super();
+    this.ch = '/';
+    this.name = 'a wand of incineration';
   }
 }
 class Potion extends Magic_Drink {
