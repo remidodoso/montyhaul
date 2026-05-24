@@ -1,7 +1,8 @@
 class Mon extends Cr {
   constructor(ch, name, attr) {
     super(ch, name, attr);
-//    this.plan = 
+    this.slots = { weapon: null };
+//    this.plan =
   }
   pick_up(obj) {
     // assuming its okay to pick up obj ...

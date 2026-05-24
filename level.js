@@ -1,5 +1,9 @@
 
-
+//
+// The Level object (WIP TBD currently a singleton but ultimately probably
+// not) is the representation of the game map's terrain, along with
+// methods dealing with other objects associated with the map, such as
+// creatures (Cr) and objects (Obj) that are placed on the map.
 //
 //
 // LAYERS and FLAGS
@@ -36,6 +40,8 @@ class Level {
     // This will be the list of objects present at this location
     //
     this.inv = new_2d(this.x_dim, this.y_dim, null);
+    this.rooms = [];
+    this.room_cells = new_2d(this.x_dim, this.y_dim, false);
     this.create_terrain();
   }
 
@@ -62,9 +68,10 @@ class Level {
   }
 
   create_connected_rooms_terrain() {
-//    this.create_new_terrain();
     this.create_filled_terrain();
-    this.create_connected_rooms();
+    let orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+    this.create_connected_rooms(orientation);
+    this.sprinkle_rooms(5);
   }
 
   make_a_room(x0, y0, x1, y1, connection) {
@@ -87,9 +94,13 @@ class Level {
         height -= 1;
         break;
     }
-    // the room is a minimum size of 2x2 to maximum of width x height
-    let room_width = Math.floor(2 + (width - 2) * Math.random());
-    let room_height = Math.floor(2 + (height - 2) * Math.random());
+    // clamp to target ranges: 2-20 wide, 2-8 tall
+    let max_w = Math.min(20, Math.max(2, width));
+    let max_h = Math.min(8, Math.max(2, height));
+    let room_width  = 2 + Math.floor((max_w - 1) * Math.random());
+    let room_height = 2 + Math.floor((max_h - 1) * Math.random());
+    room_width  = Math.min(room_width,  width);
+    room_height = Math.min(room_height, height);
     // divvy up the leftover
     let border_left = Math.floor((width - room_width) * Math.random());
     let border_right = width - room_width - border_left;
@@ -149,21 +160,25 @@ class Level {
     // connect them
     let y_connect_left = Math.floor((y01 - y00) * Math.random()) + y00;
     let y_connect_right = Math.floor((y11 - y10) * Math.random()) + y10;
-    let x_corridor_middle = Math.floor((x1 - x0 - 1) * Math.random()) + x0;
+    let x_corridor_middle = Math.floor((x1 - x0 - 1) * Math.random()) + x0 + 1;
     for (let x = x0 + 1; x < x_corridor_middle; x++) {
+      if (this.room_cells[x][y_connect_left]) break;
       this.terrain[x][y_connect_left] = K.TILE_FLOOR;
     }
     for (let x = x_corridor_middle; x < x1; x++) {
+      if (this.room_cells[x][y_connect_right]) break;
       this.terrain[x][y_connect_right] = K.TILE_FLOOR;
     }
     if (y_connect_left < y_connect_right) {
       for (let y = y_connect_left; y <= y_connect_right; y++) {
+        if (this.room_cells[x_corridor_middle][y]) break;
         this.terrain[x_corridor_middle][y] = K.TILE_FLOOR;
       }
     } else {
       for (let y = y_connect_right; y <= y_connect_left; y++) {
+        if (this.room_cells[x_corridor_middle][y]) break;
         this.terrain[x_corridor_middle][y] = K.TILE_FLOOR;
-      }  
+      }
     }
   }
   connect_horizontal_walls(y0, x00, x01, y1, x10, x11, mode) {
@@ -172,21 +187,25 @@ class Level {
     // connect them
     let x_connect_top = Math.floor((x01 - x00) * Math.random()) + x00;
     let x_connect_bottom = Math.floor((x11 - x10) * Math.random()) + x10;
-    let y_corridor_middle = Math.floor((y1 - y0 - 1) * Math.random()) + y0;
+    let y_corridor_middle = Math.floor((y1 - y0 - 1) * Math.random()) + y0 + 1;
     for (let y = y0 + 1; y < y_corridor_middle; y++) {
+      if (this.room_cells[x_connect_top][y]) break;
       this.terrain[x_connect_top][y] = K.TILE_FLOOR;
     }
     for (let y = y_corridor_middle; y < y1; y++) {
+      if (this.room_cells[x_connect_bottom][y]) break;
       this.terrain[x_connect_bottom][y] = K.TILE_FLOOR;
     }
     if (x_connect_top < x_connect_bottom) {
       for (let x = x_connect_top; x <= x_connect_bottom; x++) {
+        if (this.room_cells[x][y_corridor_middle]) break;
         this.terrain[x][y_corridor_middle] = K.TILE_FLOOR;
       }
     } else {
       for (let x = x_connect_bottom; x <= x_connect_top; x++) {
+        if (this.room_cells[x][y_corridor_middle]) break;
         this.terrain[x][y_corridor_middle] = K.TILE_FLOOR;
-      }  
+      }
     }
   }
   create_connected_rooms(orientation, rooms) {
@@ -198,69 +217,108 @@ class Level {
       // pass in an area within the rectangle defined by the partition
       let room_1 = this.make_a_room(1, 1, x_partition - 1, this.y_dim - 1, 'right');
       let room_2 = this.make_a_room(x_partition + 1, 0, this.x_dim - 1, this.y_dim - 1, 'left');
-      // place them
-      for (let x = room_1.x0; x <= room_1.x1; x++) {
-        for (let y = room_1.y0; y < room_1.y1; y++) {
-          this.terrain[x][y] = K.TILE_FLOOR;
-        }
-      }
-      for (let x = room_2.x0; x <= room_2.x1; x++) {
-        for (let y = room_2.y0; y < room_2.y1; y++) {
-          this.terrain[x][y] = K.TILE_FLOOR;
-        }
-      }
+      this.carve_room(room_1);
+      this.carve_room(room_2);
+      this.rooms.push(room_1, room_2);
       this.connect_vertical_walls(
-        room_1.x1, room_1.y0, room_1.y1, 
+        room_1.x1, room_1.y0, room_1.y1,
         room_2.x0, room_2.y0, room_2.y1, 'zigzag'
       );
     } else {
       let y_partition = Math.floor((0.5 + Math.random() * 0.3 - 0.15) * this.y_dim);
 
-      let room_1 = this.make_a_room(1, 1, this.x_dim - 1, 'bottom', y_partition - 1);
-      let room_2 = this.make_a_room(this.x_dim - 1, y_partition + 1, this.x_dim - 1, 0, 'top');
-      for (let x = room_1.x0; x <= room_1.x1; x++) {
-        for (let y = room_1.y0; y < room_1.y1; y++) {
-          this.terrain[x][y] = K.TILE_FLOOR;
-        }
-      }
-      for (let x = room_2.x0; x <= room_2.x1; x++) {
-        for (let y = room_2.y0; y < room_2.y1; y++) {
-          this.terrain[x][y] = K.TILE_FLOOR;
-        }
-      }
-      this.connect_vertical_walls(
-        room_1.x1, room_1.y0, room_1.y1, 
-        room_2.x0, room_2.y0, room_2.y1, 'zigzag'
+      let room_1 = this.make_a_room(1, 1, this.x_dim - 1, y_partition - 1, 'bottom');
+      let room_2 = this.make_a_room(1, y_partition + 1, this.x_dim - 1, this.y_dim - 1, 'top');
+      this.carve_room(room_1);
+      this.carve_room(room_2);
+      this.rooms.push(room_1, room_2);
+      this.connect_horizontal_walls(
+        room_1.y1, room_1.x0, room_1.x1,
+        room_2.y0, room_2.x0, room_2.x1, 'zigzag'
       );
     }
   }
 
-  create_terrain() {
-    //
-    // The "rooms" code is broken so it's go back to the "big room with pillars"
-    // and have this be at least playable
-    //
-
-    //    this.create_connected_rooms_terrain();
-
-    this.create_new_terrain();
-
-    //
-    // Add some random "pillars"
-    //
-    let pillars = Math.floor(Math.random() * 4) + 2;
-    for (var n = 0; n < pillars; n++) {
-      let x_size = Math.floor(Math.random() * 3) + 2;
-      let y_size = Math.floor(Math.random() * 3) + 2;
-      let x_org = Math.floor(Math.random() * (this.x_dim - 20)) + 10;
-      let y_org = Math.floor(Math.random() * (this.y_dim - 15)) + 7;
-      for (let x = x_org; x < x_org + x_size; x++) {
-        for (let y = y_org; y < y_org + y_size; y++) {
-          this.terrain[x][y] = K.TILE_WALL;
-        }
+  carve_room(room) {
+    for (let x = room.x0; x <= room.x1; x++) {
+      for (let y = room.y0; y <= room.y1; y++) {
+        this.terrain[x][y] = K.TILE_FLOOR;
+        this.room_cells[x][y] = true;
       }
     }
-    return;
+  }
+
+  rooms_overlap(r1, r2, margin) {
+    if (margin === undefined) margin = 1;
+    return r1.x0 - margin <= r2.x1 &&
+           r1.x1 + margin >= r2.x0 &&
+           r1.y0 - margin <= r2.y1 &&
+           r1.y1 + margin >= r2.y0;
+  }
+
+  room_distance(r1, r2) {
+    let cx1 = (r1.x0 + r1.x1) / 2;
+    let cy1 = (r1.y0 + r1.y1) / 2;
+    let cx2 = (r2.x0 + r2.x1) / 2;
+    let cy2 = (r2.y0 + r2.y1) / 2;
+    let dx = cx1 - cx2;
+    let dy = cy1 - cy2;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  connect_rooms(room_a, room_b) {
+    let cx_a = (room_a.x0 + room_a.x1) / 2;
+    let cx_b = (room_b.x0 + room_b.x1) / 2;
+    let cy_a = (room_a.y0 + room_a.y1) / 2;
+    let cy_b = (room_b.y0 + room_b.y1) / 2;
+    if (Math.abs(cx_a - cx_b) >= Math.abs(cy_a - cy_b)) {
+      let left  = cx_a <= cx_b ? room_a : room_b;
+      let right = cx_a <= cx_b ? room_b : room_a;
+      this.connect_vertical_walls(left.x1, left.y0, left.y1, right.x0, right.y0, right.y1, 'zigzag');
+    } else {
+      let top = cy_a <= cy_b ? room_a : room_b;
+      let bot = cy_a <= cy_b ? room_b : room_a;
+      this.connect_horizontal_walls(top.y1, top.x0, top.x1, bot.y0, bot.x0, bot.x1, 'zigzag');
+    }
+  }
+
+  try_sprinkle_room() {
+    let max_w = 10;
+    let max_h = 6;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      let rw = 2 + Math.floor((max_w - 1) * Math.random());
+      let rh = 2 + Math.floor((max_h - 1) * Math.random());
+      let x0 = 1 + Math.floor(Math.random() * (this.x_dim - rw - 1));
+      let y0 = 1 + Math.floor(Math.random() * (this.y_dim - rh - 1));
+      let room = { x0, y0, x1: x0 + rw - 1, y1: y0 + rh - 1 };
+      if (!this.rooms.some((r) => this.rooms_overlap(room, r, 1))) {
+        this.carve_room(room);
+        this.rooms.push(room);
+        return room;
+      }
+    }
+    return null;
+  }
+
+  sprinkle_rooms(n) {
+    for (let i = 0; i < n; i++) {
+      let new_room = this.try_sprinkle_room();
+      if (new_room == null) continue;
+      let nearest = null;
+      let min_dist = Infinity;
+      for (let r of this.rooms) {
+        if (r === new_room) continue;
+        let d = this.room_distance(r, new_room);
+        if (d < min_dist) { min_dist = d; nearest = r; }
+      }
+      if (nearest != null) {
+        this.connect_rooms(nearest, new_room);
+      }
+    }
+  }
+
+  create_terrain() {
+    this.create_connected_rooms_terrain();
   }
   is_opaque(x, y) {
     return this.terrain[x][y].ch == '#';
@@ -301,24 +359,43 @@ class Level {
     }
   }
   
+  /*
+   * Put an object on the floor, on the top of the inventory.
+   * Tile inventory is null if empty, so create a new Array if
+   * needed.
+   */
   push_inv_at(x, y, obj) {
+    /*
+     * Noop if for some reason called with null obj
+     */
     if (obj == null) { // NS
       return this.inv[x][y];
     }
+
+    /*
+     * Remove object from wherever it might still be
+     */
+    obj.move_to_limbo();
+
+    /*
+     * Push onto existing list, or create one first if necessary
+     */
     if (this.inv[x][y] == null) { // NS
       let inv = new Array(obj);
       this.inv[x][y] = inv;
     } else {
       this.inv[x][y].push(obj);
     }
-    obj.set_parent(this.inv[x][y]);
+    obj.set_parent(this);
+    // TBD WIP need to update the map symbol
     return this.inv[x][y];
   }
 
 
   
   /*
-   * Top object in tile inventory
+   * Top object in tile inventory. Used to determine what
+   * to display on the map, that is, the topmost item.
    */
   peek_inv_at(x, y) {
     if (this.inv[x][y] == null) { // NS
@@ -327,6 +404,15 @@ class Level {
       return this.inv[x][y][0];
     }
   }
+
+  /*
+   * Remove object from tile inventory
+   * Does not update the object or map
+   */
+  remove_from_inv_at(x, y, obj) {
+    level.inv[x][y] = level.inv[x][y].filter((o) => o === obj);
+  }
+
 
   /*
    * The whole tile inventory

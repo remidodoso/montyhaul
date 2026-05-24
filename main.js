@@ -15,31 +15,19 @@ function message(msg) {
 }
 
 function more(msg) {
-  G.draw_sets.new_set();
-//  G.draw_set.set_wait_for_space();
-  message(msg);
-//  message(msg + ' -more-');
-  G.draw_sets.new_set();
-  do_status_line();
-}
-
-function do_more() {
-  if (G.messages.length == 0) {
-    G.more_waiting_for_space = false;
-    return false;
+  if (G.message_pending) {
+    message(G.last_message + ' -more-');
+    G.draw_set.set_wait_for_space();
+    G.draw_sets.new_set();
+    message(msg);
+    G.last_message = msg;
+    G.draw_sets.new_set();
+  } else {
+    message(msg);
+    G.last_message = msg;
+    G.message_pending = true;
+    G.draw_sets.new_set();
   }
-  G.message = G.messages.pop(); //+ ' -more-';
-  for (var i = 0; i < G.message_buffer.length; i++) {
-    if (i < G.message.length) {
-      G.message_buffer[i] = G.message.charAt(i);
-    } else {
-      G.message_buffer[i] = ' ';
-    }
-  }
-  G.screen.update_message_on_screen_backing();
-  G.screen.update_screen();
-//  G.more_waiting_for_space = true;
-  return true;
 }
 
 function temp_update_status1() {
@@ -147,6 +135,7 @@ function do_status_line() {
 
 
 function handle_keypress(e) {
+  G.message_pending = false;
   _handle_keypress(e);
   G.draw_sets.draw();
 }
@@ -191,7 +180,7 @@ function _handle_keypress(e) {
     G.pager.show();
     return;
   } else if (ch == 'z') {
-    if (U.magic != null && U.magic instanceof Wand) {
+    if (U.slots.magic != null && U.slots.magic instanceof Wand) {
       UI.get_eight_dir();
       UI.set_pending_command('z');
     } else {
@@ -343,39 +332,8 @@ function init() {
   g_cr_at = new_2d(G.MAP_X, G.MAP_Y, null);
   g_obj_at = new_2d(G.MAP_X, G.MAP_Y, null);
   U = new You();
-  U.move_to(5, 5);
-//  U.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-
-
-
-  for (var i = 0; i < 15; i++) {
-    var gnome = new Gnome();
-    gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-    G.monsters.push(gnome);
-  }
-
-  for (var i = 0; i < 10; i++) {
-    var gnome = new SuperGnome();
-    gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-    G.monsters.push(gnome);
-  }
-
-  for (var i = 0; i < 5; i++) {
-    var gnome = new TurboGnome();
-    gnome.move_to_random_within(0, 0, G.MAP_X - 1, G.MAP_Y - 1);
-    G.monsters.push(gnome);
-  }
-
-  var food = new Food().place_at(10, 5);
-  var potion = new VitaminDrink().place_at(7, 7);
-  var wand = new WandOfIncineration().place_at(5, 10);
-  var weapon = new Sword().place_at(3,3);
-  new Gold().place_at(2, 2);
-
-  G.level.push_inv_at(8, 8, new Food());
-//  U.potion = new ImprovisedExplosivePotion();
-//  U.weapon = new Sword();
-//  U.magic = new Wand();
+  let start_room = G.level.rooms[Math.floor(Math.random() * G.level.rooms.length)];
+  U.move_to_random_within(start_room.x0, start_room.y0, start_room.x1, start_room.y1);
 
   G.map.update();
   G.screen.update_screen_backing();

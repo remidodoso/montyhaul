@@ -3,7 +3,11 @@ class Cr {
     this.x = -1;
     this.y = -1;
     this.on_map = false;
-    this.invent = new Array();
+    //
+    // TBD WIP creature inventory
+    // the Cr will be parent for an object in the creature's inventory
+    //
+    this.inv = new Array();
     this.ch = ch;
     this.name = name;
     this.attr = attr;
@@ -17,11 +21,10 @@ class Cr {
     this.age = 0;
     this.turns = 0;
 
-    this.weapon = null;
-    this.armor = null;
-    this.magic = null;
-    this.potion = null;
-    this.misc = null;
+    //
+    // temporary slot-based inventory
+    //
+    this.slots = {};
 
     this.tickled = 0;
   }
@@ -101,8 +104,8 @@ class Cr {
   // Things that creatures do
   //
   quaff() {
-    if (this.potion !== null) {
-      this.potion.quaffed_by(this);
+    if (this.slots.potion !== null) {
+      this.slots.potion.quaffed_by(this);
     }
   }
   pick_up() {
@@ -114,13 +117,13 @@ class Cr {
       return;
     }
     if (o instanceof Weapon) {
-      if (this.weapon != null) {
+      if (this.slots.weapon != null) {
         if (this == U) { more('You are already carrying a weapon'); }
       } else {
         if (G.map.is_on(o.x, o.y)) {
           G.level.set_obj_at(o.x, o.y, null);
           o.x = o.y = -1;
-          this.weapon = o;
+          this.slots.weapon = o;
         }
         if (this == U) {
           more('You picked up ' + o.name);
@@ -129,18 +132,18 @@ class Cr {
       }
     } else if (o instanceof Armor) {
     } else if (o instanceof Magic_Stick) {
-      if (this.magic != null) {
+      if (this.slots.magic != null) {
         if (this == U) { more('You are already carrying a magic item'); }
       } else {
         if (G.map.is_on(o.x, o.y)) {
           G.level.set_obj_at(o.x, o.y, null);
           o.x = o.y = -1;
-          this.magic = o;
+          this.slots.magic = o;
         }
         if (this == U) { more('You picked up ' + o.name); }
       }
     } else if (o instanceof Magic_Drink) {
-      if (this.potion !== null) {
+      if (this.slots.potion !== null) {
         if (this == U) {
           more('You are already carrying a magical drink.');
         }
@@ -148,7 +151,7 @@ class Cr {
         if (G.map.is_on(o.x, o.y)) {
           G.level.set_obj_at(o.x, o.y, null);
           o.x = o.y = -1;
-          this.potion = o;
+          this.slots.potion = o;
         }
         if (this == U) {
           more('You picked up ' + o.name);
@@ -267,4 +270,46 @@ class Cr {
     }
     return true;
   }
+
+
+  /*
+   * Inventory actions where Cr method is the intended entry 
+   * point, and dependencies (in particular, map and obj) are 
+   * updated in the process:
+   *   drop(obj) -- Cr drops a carried object onto the floor
+   *   pick_up(obj) -- Cr picks up an object from the floor
+   *   push_inv(obj) -- A limbo object is added to Cr's inventory
+   * 
+   * Actions where Cr method is not the intended entry point:
+   *   remove_from_inv(obj) --
+   *     called by Obj.move_to_limbo, which manages the Obj properties
+   */
+ 
+  /*
+   * push_inv(obj) -- add a (presumably) limbo object to Cr inventory
+   */
+  push_inv(obj) {
+    obj.move_to_limbo(); // not intended to be needed but harmless
+    this.inv.push(obj);
+  }
+
+  /*
+   * drop(obj) -- drop a carried object onto the floor
+   */
+  drop(obj) {
+    if (obj.parent !== this) {
+      // didn't belong to us for some reason; ignore it
+      return;
+    }
+    
+  }
+
+  /*
+   * Remove an object from cr inventory
+   * Does not update the object
+   */
+  remove_from_inv(obj) {
+    this.inv = this.inv.filter((o) => o === obj);
+  }
+
 }

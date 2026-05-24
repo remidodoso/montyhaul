@@ -1,6 +1,10 @@
 //
 //
 //
+// The Map object is the connection between the lowest-level representation
+// of the game map (an HTML table) and the Level object, which is the
+// corresponding representation of terrain and associated methods.
+//
 //
 //  SCREEN ==================== html ==================
 //

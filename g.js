@@ -46,7 +46,8 @@ class G {
     this.level = new Level(this.MAP_X, this.MAP_Y);
     this.pager = new Pager(this.MAP_X, this.MAP_Y);
 
-    this.more_waiting_for_space = false;
+    this.message_pending = false;
+    this.last_message = '';
 
     this.pager_last = false;
     this.pager_waiting_for_space = false;
@@ -56,7 +57,6 @@ class G {
     this.monsters = new Array();
 
     this.message = null;
-    this.messages = null;
     this.message_buffer = new Array();
 
     this.status1_buffer = new Array();

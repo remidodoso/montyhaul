@@ -1,6 +1,7 @@
 class You extends Cr {
   constructor() {
     super('@', 'You', 'cyan');
+    this.slots = { weapon: null, armor: null, magic: null, potion: null };
   }
   use_turn() {
     if (this.tickled > 0 && Math.random() > 0.95) {
@@ -44,27 +45,27 @@ class You extends Cr {
     }
   }
   are_armed() {
-    return (U.weapon != null);
+    return (U.slots.weapon != null);
   }
   dspl_invent() {
-    if (this.weapon == null) {
+    const labels = {
+      weapon: '      Weapon',
+      armor:  '       Armor',
+      magic:  '  Magic Item',
+      potion: '      Potion',
+    };
+    const carrying = Object.values(this.slots).some(v => v !== null);
+    if (this.slots.weapon === null) {
       G.pager.writeln('You are unarmed.');
     }
-    if (this.weapon == null && this.armor == null &&
-      this.magic == null && this.misc == null) {
+    if (!carrying) {
       G.pager.writeln("You aren't carrying anything.");
       G.pager.show();
       return;
     }
     G.pager.writeln('Your inventory --');
-    if (this.weapon) {
-      G.pager.writeln('      Weapon: ' + this.weapon.name);
-    }
-    if (this.magic) {
-      G.pager.writeln('  Magic Item: ' + this.magic.name);
-    }
-    if (this.potion) {
-      G.pager.writeln('      Potion: ' + this.potion.name);
+    for (let [slot, obj] of Object.entries(this.slots)) {
+      if (obj) { G.pager.writeln(labels[slot] + ': ' + obj.name); }
     }
     G.pager.show();
   }

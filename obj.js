@@ -43,6 +43,58 @@ class Obj {
     this.parent = parent;
   }
 
+  /*
+   * This moves an object to "limbo," where it has no parent.
+   *
+   * 
+   */
+  move_to_limbo() {
+    /*
+     * Already in limbo?
+     */
+    if (this.parent == null) { // intentional weak comparison
+      return;
+    }
+
+    /*
+     * If this is in a Cr's inventory, then the parent will be
+     * the Cr, and the inventory list will be cr.inv.
+     */
+    if (this.parent instanceof Cr) {
+      cr = this.parent;
+      for (let key in cr.slots) {
+        if (cr.slots[key] === this) { cr.slots[key] = null; }
+      }
+      cr.inv = cr.inv.filter((obj) => obj === this);
+      this.parent = null;
+      return;
+    }
+
+    /*
+     * If this is on the ground, then the parent will be a Level,
+     * and the inventory list will be level.inv[x][y].
+     */
+    if (this.parent instanceof Level) {
+      this.parent.remove_from_inv_at(x, y);
+      this.parent = null;
+      this.x = -1;
+      this.y = -1;
+      if (G.map.is_on(x, y)) {
+        /*
+         * Was it on the map? If so, update the map.
+         */
+        G.map.set_dirty(x, y);
+        G.screen.update_screen_backing();
+        G.screen.update_screen();
+      }
+      return;
+    }
+
+    /*
+     * Else, dunno, shouldn't be here yet WIP (container)?
+     */
+  }
+ 
   place_at(x, y) {
     if (this.x == x && this.y == y) {
       return;
@@ -189,7 +241,7 @@ class Potion extends Magic_Drink {
   quaffed_by(cr) {
     cr.drinks(this);
     more('Nothing happens.');
-    cr.potion = null;
+    cr.slots.potion = null;
     this.destroy();
   }
 }
@@ -202,7 +254,7 @@ class VitaminDrink extends Potion {
   quaffed_by(cr) {
     cr.drinks(this);
     cr.is_healed();
-    cr.potion = null;
+    cr.slots.potion = null;
     this.destroy();
   }
 }
@@ -214,7 +266,7 @@ class ImprovisedExplosivePotion extends Potion {
   quaffed_by(cr) {
     cr.drinks(this);
     more('Ka-boom?');
-    cr.potion = null;
+    cr.slots.potion = null;
     this.destroy();
   }
 }
