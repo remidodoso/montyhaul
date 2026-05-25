@@ -12,7 +12,7 @@ class Cr {
     this.name = name;
     this.attr = attr;
     this.dead = false;
-    this.speed = 24;
+    this.speed = 24; // # of move points consumed per turn, normal speed is 24, smaller is faster
     this.moved = 0;
     this.sight_radius = 8;
 

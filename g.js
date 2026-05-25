@@ -43,7 +43,7 @@ class G {
     this.draw_set = this.draw_sets.sets[0];
 
     this.map = new Map(this.MAP_X, this.MAP_Y);
-    this.level = new Level(this.MAP_X, this.MAP_Y);
+    this.level = new RoomsWanderLevel(this.MAP_X, this.MAP_Y);
     this.pager = new Pager(this.MAP_X, this.MAP_Y);
 
     this.message_pending = false;

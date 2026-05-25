@@ -1,6 +1,7 @@
 class You extends Cr {
   constructor() {
     super('@', 'You', 'cyan');
+    this.repeat_count = 0;
     this.slots = { weapon: null, armor: null, magic: null, potion: null };
   }
   use_turn() {

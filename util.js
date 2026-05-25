@@ -19,6 +19,17 @@ function shuffle(a) {
   return a;
 };
 
+function roll(dice) {
+  let parts = dice.split('d');
+  let m = parseInt(parts[0], 10);
+  let n = parseInt(parts[1], 10);
+  let total = 0;
+  for (let i = 0; i < m; i++) {
+    total += Math.floor(Math.random() * n) + 1;
+  }
+  return total;
+}
+
 function dir_2_coord(dir_ch) {
   switch (dir_ch) {
     case 'h': return [-1, 0];

@@ -179,6 +179,8 @@ function _handle_keypress(e) {
     }
     G.pager.show();
     return;
+  } else if (ch == '2') { // experiment with repeat count
+    U.repeat_count = 2;
   } else if (ch == 'z') {
     if (U.slots.magic != null && U.slots.magic instanceof Wand) {
       UI.get_eight_dir();
