@@ -4,6 +4,17 @@ class You extends Cr {
     this.repeat_count = 0;
     this.slots = { weapon: null, armor: null, magic: null, potion: null };
   }
+  // Override Cr.move_delta to return a success flag for repeat-move logic.
+  // Returns true if the player moved, false if blocked (no turn consumed).
+  move_delta(x_delta, y_delta) {
+    let tx = this.x + x_delta;
+    let ty = this.y + y_delta;
+    if (!this.can_move_to(tx, ty, true)) {
+      return false;
+    }
+    super.move_delta(x_delta, y_delta);
+    return true;
+  }
   use_turn() {
     if (this.tickled > 0 && Math.random() > 0.95) {
       this.tickled -= Math.ceil(Math.random() * 3);

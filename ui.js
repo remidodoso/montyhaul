@@ -72,6 +72,38 @@ class UI {
     }
   }
 
+  // Call once per completed player action to advance the game clock:
+  // monsters move, turn counter increments, status lines update.
+  // TBD: will return an interrupt flag when repeat-move logic is added
+  // Returns [dx, dy] if ch is one of the 8 movement keys, null otherwise.
+  ch_to_delta(ch) {
+    let [dx, dy] = dir_2_coord(ch);
+    return dx !== null ? [dx, dy] : null;
+  }
+
+  // Flush the current draw set and push the map to screen.
+  // anim_delay (ms) is passed to new_set() to pace animations.
+  update_display(anim_delay) {
+    G.draw_sets.new_set(anim_delay);
+    G.map.update_map_to_screen_backing();
+    G.screen.update_screen();
+  }
+
+  // Signal that any in-progress repeated action should stop after the current iteration.
+  // Called from anywhere that detects a mid-repeat event worth interrupting for
+  // (monster revealed, item underfoot, damage taken, etc.).
+  set_interrupt_repeated_action(v = true) {
+    G.interrupt_repeated_action = v;
+  }
+
+  player_turn_complete() {
+    this.mon_move();
+    U.use_turn();
+    do_status_line();
+    temp_update_status1();
+    temp_update_status2();
+  }
+
   mon_move() {
     G.monsters.forEach((m) => {
       if (!m.dead) {

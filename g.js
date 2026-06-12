@@ -65,6 +65,9 @@ class G {
     this.screen = null;
 
     this.map_dirty = null;
+
+    this.repeat_count = 1;
+    this.interrupt_repeated_action = false;
   }
   DSPL_X_() { return 80; }
 };

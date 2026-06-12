@@ -50,7 +50,7 @@ function temp_update_status1() {
 }
 
 function temp_update_status2() {
-  let s = `[${U.x < 10 ? ' ' + U.x : U.x}, ${U.y < 10 ? ' ' + U.y : U.y}]    Tickled: ${U.how_tickled()}`;
+  let s = `T${G.u_turn} [${U.x < 10 ? ' ' + U.x : U.x}, ${U.y < 10 ? ' ' + U.y : U.y}]    Tickled: ${U.how_tickled()}`;
   G.status2.write(s);
 }
 
@@ -102,9 +102,7 @@ function zap(x, y, xinc, yinc) {
      * The argument to new_set is a delay in msec. This makes the
      * animation leisurely enough that it will be seen.
      */
-    if (i % 4 == 0) { G.draw_sets.new_set(25) };
-    G.map.update_map_to_screen_backing();
-    G.screen.update_screen();
+    if (i % 4 == 0) { UI.update_display(25); }
     x += xinc;
     y += yinc;
   }
@@ -143,7 +141,14 @@ function handle_keypress(e) {
 
 function _handle_keypress(e) {
   let ch = String.fromCharCode(e.charCode);
+  // Capture repeat count for this keypress and immediately reset, so the count
+  // is never carried over to a subsequent command that didn't set it.
+  let repeat = G.repeat_count;
+  G.repeat_count = 1;
+  let delta;
 
+  // This takes care of cases where UI is looking for a character e.g.
+  // if the player needs to input a cardinal direction
   if (UI.handle_char(ch)) {
     return;
   }
@@ -164,6 +169,8 @@ function _handle_keypress(e) {
     return;
   }
 
+// Here are the "meta" commands that present information etc and do not affect play --
+// these all return without proceeding to monster turn
   if (ch == 'S') {
     let mcount = 0;
     G.monsters.forEach((mon) => {
@@ -179,9 +186,24 @@ function _handle_keypress(e) {
     }
     G.pager.show();
     return;
-  } else if (ch == '2') { // experiment with repeat count
-    U.repeat_count = 2;
-  } else if (ch == 'z') {
+  } else if (ch == '?') {
+    help();
+    return;
+  } else if (ch == 'i') {
+    U.dspl_invent();
+    return;
+  } else if (ch == 'M') {
+    G.map.set_all_map_known();
+    return;
+  } else if (ch >= '1' && ch <= '9') {
+    // Digit sets the repeat count for the immediately following command.
+    // TBD: multi-digit counts (e.g. "12l")
+    G.repeat_count = parseInt(ch, 10);
+    return;
+  }
+
+  // Here are actual player actions like movement and zapping
+  if (ch == 'z') {
     if (U.slots.magic != null && U.slots.magic instanceof Wand) {
       UI.get_eight_dir();
       UI.set_pending_command('z');
@@ -189,27 +211,15 @@ function _handle_keypress(e) {
       more("You aren't carrying a wand.");
     }
     return;
-  } else if (ch == 'k') {
-    U.move_delta(0, -1);
-  } else if (ch == 'j') {
-    U.move_delta(0, 1);
-  } else if (ch == 'h') {
-    U.move_delta(-1, 0);
-  } else if (ch == 'l') {
-    U.move_delta(1, 0);
-  } else if (ch == 'y') {
-    U.move_delta(-1, -1);
-  } else if (ch == 'u') {
-    U.move_delta(1, -1);
-  } else if (ch == 'b') {
-    U.move_delta(-1, 1);
-  } else if (ch == 'n') {
-    U.move_delta(1, 1);
-  } else if (ch == '?') {
-    help();
+  } else if ((delta = UI.ch_to_delta(ch)) !== null) {
+    G.interrupt_repeated_action = false;
+    for (let i = 0; i < repeat; i++) {
+      if (!U.move_delta(delta[0], delta[1])) break;   // blocked — no turn consumed
+      UI.player_turn_complete();
+      if (G.interrupt_repeated_action) break;           // event interrupted the repeat
+      if (repeat > 1) UI.update_display(25);
+    }
     return;
-  } else if (ch == 'M') {
-    G.map.set_all_map_known();
   } else if (ch == 'q') {
     U.quaff();
   } else if (ch == 'd') {
@@ -227,9 +237,6 @@ function _handle_keypress(e) {
     } else {
       more("There's nothing here to pick up.");
     }
-  } else if (ch == 'i') {
-    U.dspl_invent();
-    return;
   } else if (ch == '.') {
     // wait a turn
   } else {
@@ -238,12 +245,7 @@ function _handle_keypress(e) {
   if (G.dead) {
     return;
   }
-  UI.mon_move();
-  U.use_turn();
-//  message("Welcome to Montyhaul. Press '?' for help.");
-  do_status_line();
-  temp_update_status1();
-  temp_update_status2();
+  UI.player_turn_complete();
 
   e.cancelBubble = true;
   if (e.stopPropagation) e.stopPropagation();
@@ -309,7 +311,7 @@ function help() {
     '?: help (this)                                                       ');
   G.pager.writeln('');
   G.pager.writeln(
-    'When you see "-- more --" or "-- end --", press SPACE to continue.   ');
+    'When you see "-more-" or "-- end --", press SPACE to continue.   ');
   G.pager.show();
 }
 
